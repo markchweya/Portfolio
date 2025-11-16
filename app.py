@@ -58,7 +58,7 @@ html, body {
     justify-content: center;
     gap: 38px;
     z-index: 99999;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.25);
+    box-shadow: 0 0 25px rgba(255,215,0,0.25);
 }
 
 .nav-item {
@@ -80,15 +80,6 @@ html, body {
     padding: 140px 60px;
 }
 
-.hero-row {
-    display: flex;
-    flex-direction: row;
-    gap: 60px;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 140px;
-}
-
 .hero-text-title {
     font-size: 62px;
     font-weight: 900;
@@ -103,7 +94,6 @@ html, body {
     opacity: 0.85;
 }
 
-/* responsive fallback */
 @media (max-width: 980px) {
     .hero-row {
         flex-direction: column;
@@ -136,7 +126,11 @@ if st.session_state.page == "Home":
     hero_html = """
     <div style="position: relative; width: 100%; height: 650px;">
 
-        <!-- ADINKRA GOLD RAIN (Home only) -->
+        <!-- THREE.JS LIBRARIES (CRITICAL!) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+
+        <!-- ADINKRA GOLD RAIN -->
         <canvas id="adinkraCanvas"
             style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;">
         </canvas>
@@ -157,7 +151,7 @@ if st.session_state.page == "Home":
             <canvas id="avatarCanvas" style="width:100%; height:100%;"></canvas>
         </div>
 
-        <!-- HERO TEXT (RIGHT SIDE) -->
+        <!-- HERO TEXT -->
         <div style="position:absolute;
                     right:6%;
                     top:50%;
@@ -168,7 +162,7 @@ if st.session_state.page == "Home":
             <p class="hero-text-sub">Data Science & AI.</p>
         </div>
 
-        <!-- GOLD DUST AT FEET -->
+        <!-- GOLD DUST -->
         <canvas id="dustCanvas"
             style="position:absolute;
                    bottom:0;
@@ -178,11 +172,10 @@ if st.session_state.page == "Home":
                    z-index:3;">
         </canvas>
 
-    </div>
 
     <script>
     // ============================================================
-    // CANVAS AUTO-RESIZE UTIL
+    // UTILITY — Ensure canvases match screen size
     // ============================================================
     function resizeCanvasToDisplaySize(canvas) {
         const w = canvas.clientWidth;
@@ -194,18 +187,17 @@ if st.session_state.page == "Home":
     }
 
     // ============================================================
-    // 1) ADINKRA GOLD RAIN (Duafe ✺, Nkyinkyim ✤, Fawohodie ❂)
+    // 1) ADINKRA GOLD RAIN
     // ============================================================
     const adinkraCanvas = document.getElementById("adinkraCanvas");
     const actx = adinkraCanvas.getContext("2d");
-
     const symbols = ["✺","✤","❂"];
     let drops = [];
 
     function initAdinkra() {
         resizeCanvasToDisplaySize(adinkraCanvas);
         drops = [];
-        for (let i = 0; i < 60; i++) {
+        for (let i=0; i<60; i++) {
             drops.push({
                 x: Math.random()*adinkraCanvas.width,
                 y: Math.random()*adinkraCanvas.height,
@@ -238,7 +230,7 @@ if st.session_state.page == "Home":
     animateAdinkra();
 
     // ============================================================
-    // 2) GOLD RINGS (Slow Royal Rotation)
+    // 2) GOLD RINGS
     // ============================================================
     const ringsCanvas = document.getElementById("ringsCanvas");
     const rctx = ringsCanvas.getContext("2d");
@@ -264,7 +256,7 @@ if st.session_state.page == "Home":
 
             rctx.save();
             rctx.translate(cx,cy);
-            rctx.rotate((i%2===0 ? 1 : -1) * t);
+            rctx.rotate((i%2===0 ? 1 : -1)*t);
             rctx.translate(-cx,-cy);
             rctx.stroke();
             rctx.restore();
@@ -275,7 +267,7 @@ if st.session_state.page == "Home":
     animateRings();
 
     // ============================================================
-    // 3) GOLD DUST AT FEET
+    // 3) GOLD DUST
     // ============================================================
     const dustCanvas = document.getElementById("dustCanvas");
     const dctx = dustCanvas.getContext("2d");
@@ -311,7 +303,7 @@ if st.session_state.page == "Home":
     animateDust();
 
     // ============================================================
-    // 4) 3D AVATAR (auto-rotation + drag override)
+    // 4) THREE.JS AVATAR (auto-rotate + drag control)
     // ============================================================
     const avatarCanvas = document.getElementById("avatarCanvas");
 
@@ -322,7 +314,7 @@ if st.session_state.page == "Home":
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
     camera.position.set(0,1.2,2.8);
 
-    // Lighting
+    // LIGHTING
     const keyLight = new THREE.DirectionalLight(0xf6d47a, 1.4);
     keyLight.position.set(2,3,4);
     scene.add(keyLight);
@@ -331,7 +323,7 @@ if st.session_state.page == "Home":
     fillLight.position.set(-2,0,3);
     scene.add(fillLight);
 
-    // Load Avatar
+    // LOAD AVATAR
     let avatarModel = null;
     const loader = new THREE.GLTFLoader();
     loader.load(
@@ -357,8 +349,7 @@ if st.session_state.page == "Home":
 
     window.addEventListener("mousemove", e => {
         if (isDragging && avatarModel) {
-            let dx = e.clientX - prevX;
-            rotationSpeed = dx * 0.0005;
+            rotationSpeed = (e.clientX - prevX) * 0.0005;
             prevX = e.clientX;
         }
     });
@@ -412,7 +403,7 @@ if st.session_state.page == "Projects":
     st.markdown("""
     <div class="project-card">
         <h3>Titanic Survival Predictor</h3>
-        <p>Predict survival probability using applied ML techniques.</p>
+        <p>Machine learning survival prediction model.</p>
         <a href="https://markchweya.shinyapps.io/Titanic-Survival-Rate-Predictor/" target="_blank">
             View Project
         </a>
@@ -420,7 +411,7 @@ if st.session_state.page == "Projects":
 
     <div class="project-card">
         <h3>AQI Predictor</h3>
-        <p>Machine learning model to predict Air Quality Index.</p>
+        <p>Predict air quality index levels with ML.</p>
         <a href="https://aqi-predictor2.streamlit.app" target="_blank">
             View Project
         </a>
@@ -428,17 +419,17 @@ if st.session_state.page == "Projects":
 
     <div class="project-card">
         <h3>Mental Health Predictor (USA)</h3>
-        <p>Predicts likelihood of needing mental health treatment.</p>
+        <p>Predict need for mental health treatment.</p>
         <a href="https://mentalhealthpredictorusa.streamlit.app" target="_blank">
             View Project
         </a>
     </div>
 
     <div class="project-card">
-        <h3>KukiLabs</h3>
-        <p>AI tools, experiments & prototypes under KukiLabs.</p>
+        <h3>KukiLabs AI</h3>
+        <p>AI tools & experimental ML apps.</p>
         <a href="https://kukilabs.streamlit.app" target="_blank">
-            Explore KukiLabs
+            Explore
         </a>
     </div>
     """, unsafe_allow_html=True)
@@ -454,24 +445,15 @@ if st.session_state.page == "About":
     st.markdown("## 👨🏾‍💻 About Me")
 
     st.write("""
-I am **Mark Chweya**, a Data Science & Analytics student at United States International University–Africa.
+I am **Mark Chweya**, Data Science & Analytics student at USIU–Africa.
 
-My passion lies in **Artificial Intelligence**, **Machine Learning**, 
-**predictive modeling**, and building **creative AI-powered tools**.
-
-### What I Build
-- AI apps with real-world impact  
+I build:
+- Machine learning applications  
 - Predictive models  
-- Modern, futuristic interfaces  
-- Creative tech projects blending African Futurism + AI  
+- Interactive AI tools  
+- Modern, futuristic tech experiences  
 
-### Some of My Recent Work
-- Titanic ML Survival Predictor  
-- AQI Prediction App  
-- Mental Health Prediction App  
-- KukiLabs – AI Tools & Experiments  
-
-I love merging **tech**, **art**, and **innovation** into beautiful products with a unique identity.
+I'm passionate about blending **African futurism** with **cutting-edge AI** to create unique and impactful digital products.
     """)
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -486,31 +468,29 @@ if st.session_state.page == "Resume":
 
     st.write("""
 ### 🎓 Education  
-- **USIU–Africa** — BSc. Applied Computer Technology (Data Science & Analytics)  
-- **Moringa School** — Software Programming  
-- **Pioneer School** — KCSE  
+- USIU–Africa — Data Science & Analytics  
+- Moringa School — Software Programming  
+- Pioneer School — KCSE  
 
-### 🧠 Skills  
-- Python, R, SQL  
-- Machine Learning  
-- Data Visualization  
-- React / JavaScript  
-- Statistical Modeling  
-- Streamlit Apps  
-- Predictive Analytics  
+### 🛠 Skills  
+Python, R, SQL  
+Machine Learning  
+Data Science  
+React / JavaScript  
+Streamlit  
+Predictive Modeling  
 
 ### 🏅 Certifications  
 - Certificate in Computer Programming  
 
 ### 🏀 Interests  
-- Football (Manchester United)  
-- Basketball (Lakers)  
-- Golf  
-- AI Research  
+Football (Manchester United)  
+Basketball (Lakers)  
+Golf  
 
 ### 📞 Contact  
-- **Email:** chweyamark@gmail.com  
-- **Phone:** +254 703 951 840  
+- Email: **chweyamark@gmail.com**  
+- Phone: **+254 703 951 840**
     """)
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -525,16 +505,16 @@ if st.session_state.page == "Contact":
 
     st.markdown("""
         <style>
-            .contact-box {
-                background: rgba(255,255,255,0.06);
-                border: 1px solid rgba(255,215,0,0.25);
-                padding: 30px;
-                border-radius: 16px;
-                width: 60%;
-                margin-left: auto;
-                margin-right: auto;
-                box-shadow: 0 0 20px rgba(255,215,0,0.25);
-            }
+        .contact-box {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,215,0,0.25);
+            padding: 30px;
+            border-radius: 16px;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 0 20px rgba(255,215,0,0.25);
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -542,10 +522,10 @@ if st.session_state.page == "Contact":
 
     name = st.text_input("Your Name")
     email = st.text_input("Your Email")
-    message = st.text_area("Message")
+    msg = st.text_area("Message")
 
     if st.button("Send Message"):
-        st.success("Your message has been sent! (This can be connected to Gmail API next.)")
+        st.success("Message sent! (Email integration coming soon.)")
 
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
