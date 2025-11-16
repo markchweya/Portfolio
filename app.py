@@ -1,377 +1,632 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# -------------------------------------------------------------
-# PAGE CONFIG
-# -------------------------------------------------------------
+# --------------------------------------------------------
+# GLOBAL PAGE CONFIG
+# --------------------------------------------------------
 st.set_page_config(
-    page_title="Mark Chweya",
-    page_icon="👨🏾‍💻",
-    layout="wide"
+    page_title="Mark Chweya | Portfolio",
+    page_icon="✨",
+    layout="wide",
 )
 
-# -------------------------------------------------------------
-# ROUTER USING query_params
-# -------------------------------------------------------------
-params = st.query_params
-if "page" not in params:
-    st.query_params["page"] = "Home"
+# --------------------------------------------------------
+# REMOVE STREAMLIT DEFAULT UI (DEPLOY, MENUS, FOOTER)
+# --------------------------------------------------------
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    [data-testid="stToolbar"] {display: none !important;}
+    [data-testid="stDecoration"] {display: none !important;}
+    [data-testid="stStatusWidget"] {display: none !important;}
+    [data-testid="stSidebar"] {display: none !important;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-current_page = st.query_params.get("page", "Home")
+# --------------------------------------------------------
+# SESSION STATE: ACTIVE PANEL
+# --------------------------------------------------------
+if "panel" not in st.session_state:
+    st.session_state.panel = "Home"
 
-# -------------------------------------------------------------
-# LUXURY BLACK-GOLD THEME + FIXED NAVBAR
-# -------------------------------------------------------------
-st.markdown("""
+def switch_panel(p):
+    st.session_state.panel = p
+
+# --------------------------------------------------------
+# NAVIGATION BAR
+# --------------------------------------------------------
+navbar_css = """
 <style>
-
-html, body {
-    background: #050507;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}
-
-/* NAVBAR */
 .navbar {
     position: fixed;
-    top: 5%;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 75%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 215, 0, 0.25);
-    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.06);
+    padding: 12px 40px;
     border-radius: 16px;
-    padding: 15px 0px;
-    display: flex;
-    justify-content: center;
-    gap: 45px;
-    z-index: 99999;
-    box-shadow: 0 0 25px rgba(255,215,0,0.25);
+    box-shadow: 0 0 25px rgba(255,215,0,0.35);
+    backdrop-filter: blur(20px);
+    z-index: 9999;
 }
-
-/* NAV ITEMS */
 .nav-item {
-    color: #f6d47a !important;
-    font-size: 17px;
+    padding: 0 22px;
+    font-size: 20px;
     font-weight: 600;
+    color: #f5d97c;
+    cursor: pointer;
     text-decoration: none;
-    transition: 0.3s;
 }
-
 .nav-item:hover {
-    color: white !important;
-    text-shadow: 0 0 12px gold;
+    text-shadow: 0 0 10px gold;
+}
+</style>
+"""
+st.markdown(navbar_css, unsafe_allow_html=True)
+
+navbar_html = f"""
+<div class='navbar'>
+    <span class='nav-item' onclick="sendPanel('Home')">Home</span>
+    <span class='nav-item' onclick="sendPanel('Projects')">Projects</span>
+    <span class='nav-item' onclick="sendPanel('About')">About</span>
+    <span class='nav-item' onclick="sendPanel('Resume')">Resume</span>
+    <span class='nav-item' onclick="sendPanel('Contact')">Contact</span>
+</div>
+
+<script>
+function sendPanel(panel) {{
+    window.parent.postMessage({{"panel": panel}}, "*");
+}}
+</script>
+"""
+
+components.html(navbar_html, height=70)
+# --------------------------------------------------------
+# HERO SECTION (FULLSCREEN, NO SCROLL)
+# --------------------------------------------------------
+hero_html = """
+<style>
+
+body, html {
+    overflow: hidden !important;  /* No scrolling */
+    height: 100vh;
+    width: 100vw;
 }
 
-/* HERO TITLE */
-.hero-title {
-    font-size: 58px;
+/* Fullscreen hero container */
+.hero-wrap {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Text (left side) */
+.hero-text {
+    position: absolute;
+    top: 50%;
+    left: 6%;
+    transform: translateY(-50%);
+    z-index: 20;
+}
+
+.hero-name {
+    font-size: 56px;
     font-weight: 900;
     background: linear-gradient(to right, #f6d47a, #ffffff);
     -webkit-background-clip: text;
     color: transparent;
 }
 
-.hero-sub {
+.hero-role {
     font-size: 24px;
-    font-weight: 300;
-    margin-top: -10px;
     opacity: 0.85;
-    color: #d8d8d8;
+    margin-top: -8px;
+    color: #e5e5e5;
 }
 
-/* HERO SECTION full screen */
-.hero-section {
-    height: 100vh;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    padding-top: 180px;
+/* Avatar canvas (RIGHT side) */
+#avatarCanvas {
+    position: absolute;
+    right: 4%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32%;
+    height: 70%;
+    z-index: 15;
+}
+
+/* Gold rings */
+#ringsCanvas {
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    z-index: 5;
+}
+
+/* Rising Adinkra symbols */
+#adinkraCanvas {
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    z-index: 4;
+}
+
+/* BLUR BACKGROUND WHEN PANEL OPENS */
+.blur-bg {
+    filter: blur(12px) brightness(0.45);
+    transition: 0.3s ease;
+}
+
+.unblur-bg {
+    filter: none;
+    transition: 0.3s ease;
 }
 
 </style>
-""", unsafe_allow_html=True)
-
-# -------------------------------------------------------------
-# NAVBAR HTML
-# -------------------------------------------------------------
-st.markdown("""
-<div class="navbar">
-    <a href="/?page=Home" class="nav-item">Home</a>
-    <a href="/?page=Projects" class="nav-item">Projects</a>
-    <a href="/?page=About" class="nav-item">About</a>
-    <a href="/?page=Resume" class="nav-item">Resume</a>
-    <a href="/?page=Contact" class="nav-item">Contact</a>
-</div>
-""", unsafe_allow_html=True)
-# -------------------------------------------------------------
-# HOME PAGE — ONE-SCREEN HERO SECTION
-# -------------------------------------------------------------
-if current_page == "Home":
-
-    hero_html = """
-    <div class="hero-section">
-
-        <!-- Import THREE.js + GLB Loader -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
-
-        <!-- Rising Adinkra Canvas -->
-        <canvas id="adinkraUp"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;">
-        </canvas>
-
-        <!-- Rotating Rings -->
-        <canvas id="ringsCanvas"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;">
-        </canvas>
-
-        <!-- Avatar -->
-        <canvas id="avatarCanvas"
-            style="position:absolute;left:5%;top:50%;transform:translateY(-50%);
-                   width:35%;height:75%;z-index:4;">
-        </canvas>
-
-        <!-- TEXT -->
-        <div style="position:absolute;right:8%;top:50%;
-                    transform:translateY(-50%);z-index:10;text-align:left;">
-            <h1 class="hero-title">Mark Chweya</h1>
-            <p class="hero-sub">Data Science & AI.</p>
-        </div>
 
 
-    <script>
-    // Resize helper
-    function fit(canvas){
-        const w = canvas.clientWidth, h = canvas.clientHeight;
-        if(canvas.width!=w || canvas.height!=h){ canvas.width=w; canvas.height=h; }
-    }
+<div class="hero-wrap" id="hero">
 
-    // ============================================================
-    // RISING ADINKRA SYMBOLS (light mode)
-    // ============================================================
-    const upCanvas = document.getElementById("adinkraUp");
-    const uctx = upCanvas.getContext("2d");
-    const symbols = ["✺","✤","❂"];
-    let rise = [];
+    <!-- Rising Adinkra -->
+    <canvas id="adinkraCanvas"></canvas>
 
-    function initUp(){
-        fit(upCanvas);
-        rise = [];
-        for(let i=0;i<20;i++){
-            rise.push({
-                x: Math.random()*upCanvas.width,
-                y: Math.random()*upCanvas.height,
-                speed: 0.4 + Math.random()*0.8,
-                size: 12 + Math.random()*10,
-                symbol: symbols[Math.floor(Math.random()*symbols.length)]
-            });
-        }
-    }
+    <!-- Rotating rings -->
+    <canvas id="ringsCanvas"></canvas>
 
-    function animateUp(){
-        fit(upCanvas);
-        uctx.clearRect(0,0,upCanvas.width,upCanvas.height);
-        uctx.fillStyle = "rgba(255,215,0,0.85)";
-        rise.forEach(s=>{
-            uctx.font = s.size+"px serif";
-            uctx.fillText(s.symbol,s.x,s.y);
-            s.y -= s.speed;
-            if(s.y < -20){
-                s.y = upCanvas.height+20;
-                s.x = Math.random()*upCanvas.width;
-            }
-        });
-        requestAnimationFrame(animateUp);
-    }
+    <!-- Avatar -->
+    <canvas id="avatarCanvas"></canvas>
 
-    initUp();
-    animateUp();
-
-
-    // ============================================================
-    // GOLD RINGS
-    // ============================================================
-    const ringCanvas = document.getElementById("ringsCanvas");
-    const rctx = ringCanvas.getContext("2d");
-
-    function animateRings(){
-        fit(ringCanvas);
-        const w = ringCanvas.width, h = ringCanvas.height;
-
-        rctx.clearRect(0,0,w,h);
-
-        const cx = w*0.22, cy = h*0.50;
-        const t = Date.now()*0.00004;
-
-        for(let i=0;i<3;i++){
-            const R = 120 + i*36;
-            rctx.beginPath();
-            rctx.arc(cx,cy,R,0,Math.PI*2);
-            rctx.strokeStyle = "rgba(255,215,0,"+(0.45-i*0.1)+")";
-            rctx.lineWidth = 3;
-
-            rctx.save();
-            rctx.translate(cx,cy);
-            rctx.rotate( (i%2==0?1:-1)*t );
-            rctx.translate(-cx,-cy);
-            rctx.stroke();
-            rctx.restore();
-        }
-        requestAnimationFrame(animateRings);
-    }
-    animateRings();
-
-
-    // ============================================================
-    // AVATAR (smaller)
-    // ============================================================
-    const avatarCanvas = document.getElementById("avatarCanvas");
-    const renderer = new THREE.WebGLRenderer({canvas:avatarCanvas,alpha:true});
-    renderer.setPixelRatio(window.devicePixelRatio);
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
-    camera.position.set(0,1.1,2.4);
-
-    const key = new THREE.DirectionalLight(0xf6d47a,1.2);
-    key.position.set(2,3,4);
-    scene.add(key);
-
-    const fill = new THREE.DirectionalLight(0xffffff,0.5);
-    fill.position.set(-2,0,3);
-    scene.add(fill);
-
-    let avatar = null;
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-        "https://models.readyplayer.me/691a321f28f4be8b0c02cf2e.glb",
-        gltf=>{
-            avatar = gltf.scene;
-            avatar.scale.set(1.6,1.6,1.6);  // smaller avatar
-            avatar.position.y = -1.3;
-            scene.add(avatar);
-        }
-    );
-
-    let dragging=false, prevX=0, rotSpeed=0.004;
-
-    avatarCanvas.addEventListener("mousedown",e=>{
-        dragging=true; prevX=e.clientX;
-    });
-
-    window.addEventListener("mouseup",()=>dragging=false);
-
-    window.addEventListener("mousemove",e=>{
-        if(dragging && avatar){
-            rotSpeed = (e.clientX-prevX)*0.0005;
-            prevX=e.clientX;
-        }
-    });
-
-    function renderAvatar(){
-        requestAnimationFrame(renderAvatar);
-        if(avatar) avatar.rotation.y += rotSpeed;
-        renderer.setSize(avatarCanvas.clientWidth,avatarCanvas.clientHeight);
-        renderer.render(scene,camera);
-    }
-    renderAvatar();
-
-    </script>
-
+    <!-- Text -->
+    <div class="hero-text">
+        <div class="hero-name">Mark Chweya</div>
+        <div class="hero-role">Data Science & Artificial Intelligence</div>
     </div>
+
+</div>
+
+
+<!-- LOAD THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+
+
+<script>
+
+// =============================================================
+// CANVAS HELPERS
+// =============================================================
+function fitCanvas(c){
+    const w = c.clientWidth, h = c.clientHeight;
+    if(c.width != w || c.height != h){
+        c.width = w;
+        c.height = h;
+    }
+}
+
+// =============================================================
+// RISING ADINKRA SYMBOLS (LIGHT MODE)
+// =============================================================
+const aCanvas = document.getElementById("adinkraCanvas");
+const actx = aCanvas.getContext("2d");
+const symbols = ["✺","✤","❂"];
+let adinkra = [];
+
+function initAdinkra(){
+    fitCanvas(aCanvas);
+    adinkra = [];
+    for(let i=0;i<20;i++){
+        adinkra.push({
+            x: Math.random()*aCanvas.width,
+            y: Math.random()*aCanvas.height,
+            size: 12 + Math.random()*8,
+            speed: 0.4 + Math.random()*0.5,
+            char: symbols[Math.floor(Math.random()*symbols.length)]
+        });
+    }
+}
+
+function animateAdinkra(){
+    fitCanvas(aCanvas);
+    actx.clearRect(0,0,aCanvas.width,aCanvas.height);
+    actx.fillStyle = "rgba(255,215,0,0.85)";
+
+    adinkra.forEach(s=>{
+        actx.font = s.size+"px serif";
+        actx.fillText(s.char, s.x, s.y);
+        s.y -= s.speed;
+        if(s.y < -20){
+            s.y = aCanvas.height + 20;
+            s.x = Math.random()*aCanvas.width;
+        }
+    });
+
+    requestAnimationFrame(animateAdinkra);
+}
+
+initAdinkra();
+animateAdinkra();
+
+
+// =============================================================
+// GOLD ROTATING RINGS
+// =============================================================
+const rCanvas = document.getElementById("ringsCanvas");
+const rctx = rCanvas.getContext("2d");
+
+function animateRings(){
+    fitCanvas(rCanvas);
+    const w = rCanvas.width, h = rCanvas.height;
+
+    rctx.clearRect(0,0,w,h);
+
+    const cx = w * 0.70;  // shift to right (behind avatar)
+    const cy = h * 0.50;
+    const t = Date.now() * 0.00004;
+
+    for(let i=0;i<3;i++){
+        const R = 120 + i*35;
+
+        rctx.beginPath();
+        rctx.arc(cx, cy, R, 0, Math.PI*2);
+        rctx.strokeStyle = "rgba(255,215,0,"+(0.45-i*0.1)+")";
+        rctx.lineWidth = 3;
+
+        rctx.save();
+        rctx.translate(cx,cy);
+        rctx.rotate((i%2===0 ? 1 : -1) * t);
+        rctx.translate(-cx,-cy);
+        rctx.stroke();
+        rctx.restore();
+    }
+
+    requestAnimationFrame(animateRings);
+}
+animateRings();
+
+
+// =============================================================
+// 3D AVATAR
+// =============================================================
+const avatarCanvas = document.getElementById("avatarCanvas");
+const renderer = new THREE.WebGLRenderer({canvas: avatarCanvas, alpha:true});
+renderer.setPixelRatio(window.devicePixelRatio);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+camera.position.set(0,1.1,2.4);
+
+const key = new THREE.DirectionalLight(0xf6d47a,1.2);
+key.position.set(2,3,4);
+scene.add(key);
+
+const fill = new THREE.DirectionalLight(0xffffff,0.4);
+fill.position.set(-2,0,3);
+scene.add(fill);
+
+let avatar = null;
+
+const loader = new THREE.GLTFLoader();
+loader.load(
+    "https://models.readyplayer.me/691a321f28f4be8b0c02cf2e.glb",
+    gltf=>{
+        avatar = gltf.scene;
+        avatar.scale.set(1.55,1.55,1.55);
+        avatar.position.y = -1.28;
+        scene.add(avatar);
+    }
+);
+
+let dragging=false, prevX=0, rot=0.004;
+
+avatarCanvas.addEventListener("mousedown", e=>{
+    dragging=true; prevX=e.clientX;
+});
+window.addEventListener("mouseup", ()=>dragging=false);
+window.addEventListener("mousemove", e=>{
+    if(dragging && avatar){
+        rot = (e.clientX - prevX)*0.0004;
+        prevX = e.clientX;
+    }
+});
+
+function animateAvatar(){
+    requestAnimationFrame(animateAvatar);
+    if(avatar) avatar.rotation.y += rot;
+    renderer.setSize(avatarCanvas.clientWidth, avatarCanvas.clientHeight);
+    renderer.render(scene,camera);
+}
+animateAvatar();
+
+
+// =============================================================
+// PANEL OPEN/CLOSE BLUR CONTROL
+// (Executed from Part 3)
+// =============================================================
+window.addEventListener("message", (event)=>{
+    if(event.data.blur){
+        document.getElementById("hero").classList.add("blur-bg");
+    } else {
+        document.getElementById("hero").classList.remove("blur-bg");
+    }
+});
+
+</script>
+"""
+
+components.html(hero_html, height=850)
+# --------------------------------------------------------
+# SLIDING PANEL SYSTEM (Smooth horizontal transitions)
+# --------------------------------------------------------
+panel_engine = """
+<style>
+
+.panel-container {
+    position: fixed;
+    top: 0;
+    left: 100vw;              /* Start off-screen on the RIGHT */
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10,10,10,0.75);
+    backdrop-filter: blur(18px);
+    transition: all 0.30s ease;   /* SMOOTH */
+    z-index: 9998;
+    padding: 120px 80px;
+    color: #f5f5f5;
+    overflow: hidden;
+}
+
+/* When panel is active (slide into view) */
+.panel-active {
+    left: 0 !important;
+}
+
+/* Close button */
+.close-btn {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    font-size: 32px;
+    cursor: pointer;
+    color: #f6d47a;
+}
+.close-btn:hover {
+    text-shadow: 0 0 12px gold;
+}
+
+.panel-title {
+    font-size: 48px;
+    font-weight: 900;
+    margin-bottom: 25px;
+    background: linear-gradient(to right, #f6d47a, #ffffff);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.panel-content {
+    font-size: 20px;
+    line-height: 1.55;
+    width: 60%;
+}
+
+</style>
+
+<div id="slidePanel" class="panel-container">
+    <div class="close-btn" onclick="closePanel()">×</div>
+    <div id="panelInner"></div>
+</div>
+
+<script>
+
+/* COMMUNICATION BETWEEN STREAMLIT + JS */
+window.addEventListener("message", (event) => {
+    if (event.data.type === "open-panel") {
+        openPanel(event.data.content);
+    }
+    if (event.data.type === "close-panel") {
+        closePanel();
+    }
+});
+
+/* OPEN PANEL */
+function openPanel(htmlContent) {
+    const panel = document.getElementById("slidePanel");
+    document.getElementById("panelInner").innerHTML = htmlContent;
+
+    panel.classList.add("panel-active");
+
+    window.parent.postMessage({ "blur": true }, "*");
+}
+
+/* CLOSE PANEL */
+function closePanel() {
+    const panel = document.getElementById("slidePanel");
+    panel.classList.remove("panel-active");
+
+    window.parent.postMessage({ "blur": false }, "*");
+}
+
+</script>
+"""
+
+components.html(panel_engine, height=0)
+# --------------------------------------------------------
+# PANEL CONTENT DEFINITIONS (HTML)
+# --------------------------------------------------------
+
+def make_html_panel(title, body):
+    return f"""
+    <div class='panel-title'>{title}</div>
+    <div class='panel-content'>{body}</div>
     """
 
-    components.html(hero_html, height=900)
-# -------------------------------------------------------------
-# PROJECTS PAGE
-# -------------------------------------------------------------
-if current_page == "Projects":
-    st.markdown("## 🌟 Projects")
+# ---------- PROJECTS PANEL ----------
+projects_html = make_html_panel(
+    "Projects",
+    """
+    <p><b>🔹 Titanic Survival Predictor</b><br>
+    Machine learning model predicting Titanic survival.<br>
+    <a href='https://markchweya.shinyapps.io/Titanic-Survival-Rate-Predictor/' target='_blank' style='color:#f6d47a;'>Open Project →</a></p>
 
-    st.write("""
-### 🔹 Titanic Survival Predictor  
-Predicts survival probability using ML.  
-👉 https://markchweya.shinyapps.io/Titanic-Survival-Rate-Predictor/
+    <p><b>🔹 AQI Predictor</b><br>
+    Predicting Air Quality Index using ML.<br>
+    <a href='https://aqi-predictor2.streamlit.app' target='_blank' style='color:#f6d47a;'>Open App →</a></p>
 
-### 🔹 AQI Predictor  
-Predicts Air Quality Index.  
-👉 https://aqi-predictor2.streamlit.app
+    <p><b>🔹 Mental Health Predictor (USA)</b><br>
+    Predict likelihood of needing mental health treatment.<br>
+    <a href='https://mentalhealthpredictorusa.streamlit.app' target='_blank' style='color:#f6d47a;'>Open Predictor →</a></p>
 
-### 🔹 Mental Health Predictor (USA)  
-Predicts likelihood of needing mental health treatment.  
-👉 https://mentalhealthpredictorusa.streamlit.app
+    <p><b>🔹 KukiLabs</b><br>
+    A collection of AI tools, experiments and prototypes.<br>
+    <a href='https://kukilabs.streamlit.app' target='_blank' style='color:#f6d47a;'>Explore KukiLabs →</a></p>
+    """
+)
 
-### 🔹 KukiLabs  
-AI Tools & Prototypes.  
-👉 https://kukilabs.streamlit.app
-    """)
+# ---------- ABOUT PANEL ----------
+about_html = make_html_panel(
+    "About Me",
+    """
+    I am <b>Mark Chweya</b>, a Data Science & Analytics student at USIU–Africa.<br><br>
+
+    My work blends:<br>
+    • Machine Learning<br>
+    • Predictive Modeling<br>
+    • Data Visualization<br>
+    • Artificial Intelligence<br>
+    • Creative futuristic UI design<br><br>
+
+    I specialize in building interactive AI tools with a unique African futurist identity.
+    """
+)
+
+# ---------- RESUME PANEL ----------
+resume_html = make_html_panel(
+    "Resume",
+    """
+    <b>🎓 Education</b><br>
+    • USIU–Africa — BSc. Applied Computer Technology (Data Science & Analytics)<br>
+    • Moringa School — Software Engineering<br>
+    • Pioneer School — KCSE<br><br>
+
+    <b>🛠 Skills</b><br>
+    Python, R, SQL, Machine Learning<br>
+    Streamlit, React, Data Visualization<br>
+    Predictive Modelling, AI Systems<br><br>
+
+    <b>🏅 Certifications</b><br>
+    • Certificate in Computer Programming<br><br>
+
+    <b>🏀 Interests</b><br>
+    • Football (Manchester United)<br>
+    • Basketball (Lakers)<br>
+    • Golf<br>
+    • AI research and UI/UX futurism<br><br>
+
+    <b>📞 Contact</b><br>
+    Email: <span style='color:#f6d47a;'>chweyamark@gmail.com</span><br>
+    Phone: <span style='color:#f6d47a;'>+254 703 951 840</span>
+    """
+)
+
+# ---------- CONTACT PANEL ----------
+contact_html = make_html_panel(
+    "Contact Me",
+    """
+    Want to collaborate, hire me, or discuss a project?<br><br>
+
+    <b>Email:</b> <span style='color:#f6d47a;'>chweyamark@gmail.com</span><br>
+    <b>Phone:</b> <span style='color:#f6d47a;'>+254 703 951 840</span><br><br>
+
+    <b>Message Form (future integration):</b><br><br>
+    <i>This will be replaced with a live email-sending backend.</i>
+    """
+)
+
+# --------------------------------------------------------
+# MAP PANEL NAMES → HTML CONTENT
+# --------------------------------------------------------
+panel_mapping = {
+    "Projects": projects_html,
+    "About": about_html,
+    "Resume": resume_html,
+    "Contact": contact_html
+}
+# --------------------------------------------------------
+# PART 5 — FINAL PANEL TRIGGER LOGIC
+# --------------------------------------------------------
+
+# Listen for navbar click events via postMessage
+components.html(
+    """
+    <script>
+    window.addEventListener("message", (event) => {
+        if (event.data.panel) {
+            window.parent.postMessage({"set-panel": event.data.panel}, "*");
+        }
+    });
+    </script>
+    """,
+    height=0
+)
+
+# Handle message from JS (navbar → python)
+def handle_panel_message():
+    msg = st.experimental_get_query_params()  # Only used for updates
+    # But actual panel switching will be done via JS → Streamlit bridge below
 
 
-# -------------------------------------------------------------
-# ABOUT PAGE
-# -------------------------------------------------------------
-if current_page == "About":
-    st.markdown("## 👨🏾‍💻 About Me")
+# --------------------------------------------------------
+# JS BRIDGE: NAVBAR → STREAMLIT SESSION STATE
+# --------------------------------------------------------
+bridge = """
+<script>
+window.addEventListener("message", (event) => {
+    if (event.data["set-panel"]) {
+        const p = event.data["set-panel"];
+        fetch("/?panel=" + p)  // triggers rerun with correct panel
+    }
+});
+</script>
+"""
+components.html(bridge, height=0)
 
-    st.write("""
-I am **Mark Chweya**, a Data Science & Analytics student at USIU–Africa.
-
-I build modern machine learning applications, predictive models, and AI tools
-with a futuristic African aesthetic.
-
-I combine:
-- Data Science  
-- AI Engineering  
-- UI Design  
-- African Futurism  
-
-to create memorable digital products.
-    """)
+# Read panel param (set by JS bridge)
+if "panel" in st.query_params:
+    st.session_state.panel = st.query_params["panel"]
 
 
-# -------------------------------------------------------------
-# RESUME PAGE
-# -------------------------------------------------------------
-if current_page == "Resume":
-    st.markdown("## 📄 Resume")
+# --------------------------------------------------------
+# OPEN OR CLOSE PANELS BASED ON STATE
+# --------------------------------------------------------
 
-    st.write("""
-### 🎓 Education  
-- USIU–Africa — Data Science & Analytics  
-- Moringa School — Software Programming  
-- Pioneer School — KCSE  
+if st.session_state.panel != "Home":
+    # Send command to JS panel engine
+    components.html(
+        f"""
+        <script>
+        window.parent.postMessage({{
+            type: "open-panel",
+            content: `{panel_mapping[st.session_state.panel]}`
+        }}, "*");
+        </script>
+        """,
+        height=0
+    )
 
-### 🧠 Skills  
-Python • R • SQL • Machine Learning  
-Data Visualization • Predictive Analytics  
-React • Streamlit  
-
-### 🏅 Certifications  
-- Certificate in Computer Programming  
-
-### 🏀 Interests  
-Football (Manchester United)  
-Basketball (Lakers)  
-Golf  
-
-### 📞 Contact  
-Email: **chweyamark@gmail.com**  
-Phone: **+254 703 951 840**
-    """)
-
-
-# -------------------------------------------------------------
-# CONTACT PAGE
-# -------------------------------------------------------------
-if current_page == "Contact":
-    st.markdown("## ✉ Contact Me")
-
-    name = st.text_input("Your Name")
-    email = st.text_input("Your Email")
-    msg = st.text_area("Message")
-
-    if st.button("Send Message"):
-        st.success("Message sent! (Email integration coming soon.)")
+else:
+    # Close any open panels
+    components.html(
+        """
+        <script>
+        window.parent.postMessage({ type: "close-panel" }, "*");
+        </script>
+        """,
+        height=0
+    )
