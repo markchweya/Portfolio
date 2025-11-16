@@ -11,38 +11,28 @@ st.set_page_config(
 )
 
 # -------------------------------------------------------------
-# SESSION STATE FOR NAVIGATION
-# -------------------------------------------------------------
-if "page" not in st.session_state:
-    st.session_state.page = "Home"
-
-def navigate_to(page_name):
-    st.session_state.page = page_name
-
-# -------------------------------------------------------------
-# HANDLE NAVIGATION USING NEW Streamlit PARAMS API
+# ROUTER USING query_params
 # -------------------------------------------------------------
 params = st.query_params
-if "page" in params:
-    st.session_state.page = params["page"]
+if "page" not in params:
+    st.query_params["page"] = "Home"
+
+current_page = st.query_params.get("page", "Home")
 
 # -------------------------------------------------------------
-# GLOBAL BLACK × GOLD LUXURY THEME + FLOATING NAVBAR CSS
+# LUXURY BLACK-GOLD THEME + FIXED NAVBAR
 # -------------------------------------------------------------
 st.markdown("""
 <style>
 
 html, body {
+    background: #050507;
     margin: 0;
     padding: 0;
-    background: #000000;
-    color: #f2f2f2;
-    font-family: 'Inter', sans-serif;
     overflow-x: hidden;
 }
 
-/* ---------------- FLOATING GLASS NAVBAR ---------------- */
-
+/* NAVBAR */
 .navbar {
     position: fixed;
     top: 5%;
@@ -51,419 +41,301 @@ html, body {
     width: 75%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 215, 0, 0.25);
-    backdrop-filter: blur(18px);
-    border-radius: 14px;
-    padding: 18px 28px;
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 15px 0px;
     display: flex;
     justify-content: center;
-    gap: 38px;
+    gap: 45px;
     z-index: 99999;
     box-shadow: 0 0 25px rgba(255,215,0,0.25);
 }
 
+/* NAV ITEMS */
 .nav-item {
-    color: #f6d47a;
-    font-weight: 500;
+    color: #f6d47a !important;
     font-size: 17px;
-    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
     transition: 0.3s;
 }
 
 .nav-item:hover {
-    color: #ffffff;
-    text-shadow: 0 0 10px gold;
+    color: white !important;
+    text-shadow: 0 0 12px gold;
 }
 
-/* ---------------- BASIC LAYOUT / HERO ---------------- */
-
-.section {
-    padding: 140px 60px;
-}
-
-.hero-text-title {
-    font-size: 62px;
+/* HERO TITLE */
+.hero-title {
+    font-size: 58px;
     font-weight: 900;
     background: linear-gradient(to right, #f6d47a, #ffffff);
     -webkit-background-clip: text;
     color: transparent;
 }
 
-.hero-text-sub {
-    font-size: 26px;
+.hero-sub {
+    font-size: 24px;
     font-weight: 300;
+    margin-top: -10px;
     opacity: 0.85;
+    color: #d8d8d8;
 }
 
-@media (max-width: 980px) {
-    .hero-row {
-        flex-direction: column;
-        text-align: center;
-    }
+/* HERO SECTION full screen */
+.hero-section {
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    padding-top: 180px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------------------
-# FLOATING NAVBAR HTML
+# NAVBAR HTML
 # -------------------------------------------------------------
 st.markdown("""
 <div class="navbar">
-    <span class="nav-item" onclick="window.location.href='/?page=Home'">Home</span>
-    <span class="nav-item" onclick="window.location.href='/?page=Projects'">Projects</span>
-    <span class="nav-item" onclick="window.location.href='/?page=About'">About</span>
-    <span class="nav-item" onclick="window.location.href='/?page=Resume'">Resume</span>
-    <span class="nav-item" onclick="window.location.href='/?page=Contact'">Contact</span>
+    <a href="/?page=Home" class="nav-item">Home</a>
+    <a href="/?page=Projects" class="nav-item">Projects</a>
+    <a href="/?page=About" class="nav-item">About</a>
+    <a href="/?page=Resume" class="nav-item">Resume</a>
+    <a href="/?page=Contact" class="nav-item">Contact</a>
 </div>
 """, unsafe_allow_html=True)
 # -------------------------------------------------------------
-# HOME PAGE (Hero + Avatar + Rings + Gold Dust + Adinkra Rain)
+# HOME PAGE — ONE-SCREEN HERO SECTION
 # -------------------------------------------------------------
-if st.session_state.page == "Home":
-
-    st.markdown("<div class='section'>", unsafe_allow_html=True)
+if current_page == "Home":
 
     hero_html = """
-    <div style="position: relative; width: 100%; height: 650px;">
+    <div class="hero-section">
 
-        <!-- THREE.JS LIBRARIES (CRITICAL!) -->
+        <!-- Import THREE.js + GLB Loader -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
 
-        <!-- ADINKRA GOLD RAIN -->
-        <canvas id="adinkraCanvas"
+        <!-- Rising Adinkra Canvas -->
+        <canvas id="adinkraUp"
             style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;">
         </canvas>
 
-        <!-- GOLD RINGS -->
+        <!-- Rotating Rings -->
         <canvas id="ringsCanvas"
             style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;">
         </canvas>
 
-        <!-- AVATAR CANVAS (LEFT SIDE) -->
-        <div style="position:absolute;
-                    left:4%;
-                    top:50%;
-                    transform: translateY(-50%);
-                    width:40%;
-                    height:100%;
-                    z-index:5;">
-            <canvas id="avatarCanvas" style="width:100%; height:100%;"></canvas>
-        </div>
-
-        <!-- HERO TEXT -->
-        <div style="position:absolute;
-                    right:6%;
-                    top:50%;
-                    transform: translateY(-50%);
-                    width:40%;
-                    z-index:10;">
-            <h1 class="hero-text-title">Mark Chweya</h1>
-            <p class="hero-text-sub">Data Science & AI.</p>
-        </div>
-
-        <!-- GOLD DUST -->
-        <canvas id="dustCanvas"
-            style="position:absolute;
-                   bottom:0;
-                   left:0;
-                   width:100%;
-                   height:250px;
-                   z-index:3;">
+        <!-- Avatar -->
+        <canvas id="avatarCanvas"
+            style="position:absolute;left:5%;top:50%;transform:translateY(-50%);
+                   width:35%;height:75%;z-index:4;">
         </canvas>
+
+        <!-- TEXT -->
+        <div style="position:absolute;right:8%;top:50%;
+                    transform:translateY(-50%);z-index:10;text-align:left;">
+            <h1 class="hero-title">Mark Chweya</h1>
+            <p class="hero-sub">Data Science & AI.</p>
+        </div>
 
 
     <script>
-    // ============================================================
-    // UTILITY — Ensure canvases match screen size
-    // ============================================================
-    function resizeCanvasToDisplaySize(canvas) {
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        if (canvas.width !== w || canvas.height !== h) {
-            canvas.width = w;
-            canvas.height = h;
-        }
+    // Resize helper
+    function fit(canvas){
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        if(canvas.width!=w || canvas.height!=h){ canvas.width=w; canvas.height=h; }
     }
 
     // ============================================================
-    // 1) ADINKRA GOLD RAIN
+    // RISING ADINKRA SYMBOLS (light mode)
     // ============================================================
-    const adinkraCanvas = document.getElementById("adinkraCanvas");
-    const actx = adinkraCanvas.getContext("2d");
+    const upCanvas = document.getElementById("adinkraUp");
+    const uctx = upCanvas.getContext("2d");
     const symbols = ["✺","✤","❂"];
-    let drops = [];
+    let rise = [];
 
-    function initAdinkra() {
-        resizeCanvasToDisplaySize(adinkraCanvas);
-        drops = [];
-        for (let i=0; i<60; i++) {
-            drops.push({
-                x: Math.random()*adinkraCanvas.width,
-                y: Math.random()*adinkraCanvas.height,
-                speed: 1 + Math.random()*2,
-                size: 18 + Math.random()*18,
+    function initUp(){
+        fit(upCanvas);
+        rise = [];
+        for(let i=0;i<20;i++){
+            rise.push({
+                x: Math.random()*upCanvas.width,
+                y: Math.random()*upCanvas.height,
+                speed: 0.4 + Math.random()*0.8,
+                size: 12 + Math.random()*10,
                 symbol: symbols[Math.floor(Math.random()*symbols.length)]
             });
         }
     }
 
-    function animateAdinkra() {
-        resizeCanvasToDisplaySize(adinkraCanvas);
-        actx.clearRect(0,0,adinkraCanvas.width,adinkraCanvas.height);
-        actx.fillStyle = "rgba(255,215,0,0.85)";
-
-        drops.forEach(d => {
-            actx.font = d.size + "px serif";
-            actx.fillText(d.symbol, d.x, d.y);
-            d.y += d.speed;
-            if (d.y > adinkraCanvas.height) {
-                d.y = -20;
-                d.x = Math.random()*adinkraCanvas.width;
+    function animateUp(){
+        fit(upCanvas);
+        uctx.clearRect(0,0,upCanvas.width,upCanvas.height);
+        uctx.fillStyle = "rgba(255,215,0,0.85)";
+        rise.forEach(s=>{
+            uctx.font = s.size+"px serif";
+            uctx.fillText(s.symbol,s.x,s.y);
+            s.y -= s.speed;
+            if(s.y < -20){
+                s.y = upCanvas.height+20;
+                s.x = Math.random()*upCanvas.width;
             }
         });
-
-        requestAnimationFrame(animateAdinkra);
+        requestAnimationFrame(animateUp);
     }
 
-    initAdinkra();
-    animateAdinkra();
+    initUp();
+    animateUp();
+
 
     // ============================================================
-    // 2) GOLD RINGS
+    // GOLD RINGS
     // ============================================================
-    const ringsCanvas = document.getElementById("ringsCanvas");
-    const rctx = ringsCanvas.getContext("2d");
+    const ringCanvas = document.getElementById("ringsCanvas");
+    const rctx = ringCanvas.getContext("2d");
 
-    function animateRings() {
-        resizeCanvasToDisplaySize(ringsCanvas);
-        let w = ringsCanvas.width;
-        let h = ringsCanvas.height;
+    function animateRings(){
+        fit(ringCanvas);
+        const w = ringCanvas.width, h = ringCanvas.height;
 
         rctx.clearRect(0,0,w,h);
 
-        let cx = w * 0.22;
-        let cy = h * 0.50;
+        const cx = w*0.22, cy = h*0.50;
+        const t = Date.now()*0.00004;
 
-        let t = Date.now() * 0.00004;
-
-        for (let i=0; i<3; i++) {
-            let radius = 140 + i*40;
+        for(let i=0;i<3;i++){
+            const R = 120 + i*36;
             rctx.beginPath();
-            rctx.arc(cx, cy, radius, 0, Math.PI*2);
-            rctx.strokeStyle = "rgba(255,215,0," + (0.45 - i*0.1) + ")";
+            rctx.arc(cx,cy,R,0,Math.PI*2);
+            rctx.strokeStyle = "rgba(255,215,0,"+(0.45-i*0.1)+")";
             rctx.lineWidth = 3;
 
             rctx.save();
             rctx.translate(cx,cy);
-            rctx.rotate((i%2===0 ? 1 : -1)*t);
+            rctx.rotate( (i%2==0?1:-1)*t );
             rctx.translate(-cx,-cy);
             rctx.stroke();
             rctx.restore();
         }
-
         requestAnimationFrame(animateRings);
     }
     animateRings();
 
-    // ============================================================
-    // 3) GOLD DUST
-    // ============================================================
-    const dustCanvas = document.getElementById("dustCanvas");
-    const dctx = dustCanvas.getContext("2d");
-
-    let dust = [];
-    for (let i=0; i<70; i++) {
-        dust.push({
-            x: 60 + Math.random()*380,
-            y: 100 + Math.random()*100,
-            speed: 0.3 + Math.random()*0.6,
-            size: 2 + Math.random()*4
-        });
-    }
-
-    function animateDust() {
-        resizeCanvasToDisplaySize(dustCanvas);
-        dctx.clearRect(0,0,dustCanvas.width,dustCanvas.height);
-
-        dctx.fillStyle = "rgba(255,215,0,0.9)";
-        dust.forEach(p => {
-            dctx.beginPath();
-            dctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-            dctx.fill();
-            p.y -= p.speed;
-            if (p.y < 0) {
-                p.y = dustCanvas.height;
-                p.x = 60 + Math.random()*380;
-            }
-        });
-
-        requestAnimationFrame(animateDust);
-    }
-    animateDust();
 
     // ============================================================
-    // 4) THREE.JS AVATAR (auto-rotate + drag control)
+    // AVATAR (smaller)
     // ============================================================
     const avatarCanvas = document.getElementById("avatarCanvas");
-
-    const renderer = new THREE.WebGLRenderer({ canvas: avatarCanvas, alpha:true });
+    const renderer = new THREE.WebGLRenderer({canvas:avatarCanvas,alpha:true});
     renderer.setPixelRatio(window.devicePixelRatio);
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
-    camera.position.set(0,1.2,2.8);
+    camera.position.set(0,1.1,2.4);
 
-    // LIGHTING
-    const keyLight = new THREE.DirectionalLight(0xf6d47a, 1.4);
-    keyLight.position.set(2,3,4);
-    scene.add(keyLight);
+    const key = new THREE.DirectionalLight(0xf6d47a,1.2);
+    key.position.set(2,3,4);
+    scene.add(key);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    fillLight.position.set(-2,0,3);
-    scene.add(fillLight);
+    const fill = new THREE.DirectionalLight(0xffffff,0.5);
+    fill.position.set(-2,0,3);
+    scene.add(fill);
 
-    // LOAD AVATAR
-    let avatarModel = null;
+    let avatar = null;
     const loader = new THREE.GLTFLoader();
     loader.load(
         "https://models.readyplayer.me/691a321f28f4be8b0c02cf2e.glb",
-        gltf => {
-            avatarModel = gltf.scene;
-            avatarModel.scale.set(2.1,2.1,2.1);
-            avatarModel.position.y = -1.45;
-            scene.add(avatarModel);
+        gltf=>{
+            avatar = gltf.scene;
+            avatar.scale.set(1.6,1.6,1.6);  // smaller avatar
+            avatar.position.y = -1.3;
+            scene.add(avatar);
         }
     );
 
-    let isDragging = false;
-    let prevX = 0;
-    let rotationSpeed = 0.004;
+    let dragging=false, prevX=0, rotSpeed=0.004;
 
-    avatarCanvas.addEventListener("mousedown", e => {
-        isDragging = true;
-        prevX = e.clientX;
+    avatarCanvas.addEventListener("mousedown",e=>{
+        dragging=true; prevX=e.clientX;
     });
 
-    window.addEventListener("mouseup", ()=> isDragging=false);
+    window.addEventListener("mouseup",()=>dragging=false);
 
-    window.addEventListener("mousemove", e => {
-        if (isDragging && avatarModel) {
-            rotationSpeed = (e.clientX - prevX) * 0.0005;
-            prevX = e.clientX;
+    window.addEventListener("mousemove",e=>{
+        if(dragging && avatar){
+            rotSpeed = (e.clientX-prevX)*0.0005;
+            prevX=e.clientX;
         }
     });
 
-    function animateAvatar() {
-        requestAnimationFrame(animateAvatar);
-        if (avatarModel) avatarModel.rotation.y += rotationSpeed;
-
-        renderer.setSize(avatarCanvas.clientWidth, avatarCanvas.clientHeight);
-        renderer.render(scene, camera);
+    function renderAvatar(){
+        requestAnimationFrame(renderAvatar);
+        if(avatar) avatar.rotation.y += rotSpeed;
+        renderer.setSize(avatarCanvas.clientWidth,avatarCanvas.clientHeight);
+        renderer.render(scene,camera);
     }
-    animateAvatar();
+    renderAvatar();
 
     </script>
+
+    </div>
     """
 
-    components.html(hero_html, height=700)
-    st.markdown("</div>", unsafe_allow_html=True)
+    components.html(hero_html, height=900)
 # -------------------------------------------------------------
 # PROJECTS PAGE
 # -------------------------------------------------------------
-if st.session_state.page == "Projects":
-    st.markdown("<div class='section'>", unsafe_allow_html=True)
+if current_page == "Projects":
     st.markdown("## 🌟 Projects")
 
-    st.markdown("""
-    <style>
-    .project-card {
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,215,0,0.25);
-        padding: 20px;
-        border-radius: 16px;
-        margin-bottom: 18px;
-        box-shadow: 0 0 15px rgba(255,215,0,0.15);
-        transition: 0.3s;
-    }
-    .project-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 0 25px rgba(255,215,0,0.45);
-    }
-    a {
-        color: #f6d47a;
-        text-decoration: none;
-    }
-    a:hover {
-        text-shadow: 0 0 10px gold;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    st.write("""
+### 🔹 Titanic Survival Predictor  
+Predicts survival probability using ML.  
+👉 https://markchweya.shinyapps.io/Titanic-Survival-Rate-Predictor/
 
-    st.markdown("""
-    <div class="project-card">
-        <h3>Titanic Survival Predictor</h3>
-        <p>Machine learning survival prediction model.</p>
-        <a href="https://markchweya.shinyapps.io/Titanic-Survival-Rate-Predictor/" target="_blank">
-            View Project
-        </a>
-    </div>
+### 🔹 AQI Predictor  
+Predicts Air Quality Index.  
+👉 https://aqi-predictor2.streamlit.app
 
-    <div class="project-card">
-        <h3>AQI Predictor</h3>
-        <p>Predict air quality index levels with ML.</p>
-        <a href="https://aqi-predictor2.streamlit.app" target="_blank">
-            View Project
-        </a>
-    </div>
+### 🔹 Mental Health Predictor (USA)  
+Predicts likelihood of needing mental health treatment.  
+👉 https://mentalhealthpredictorusa.streamlit.app
 
-    <div class="project-card">
-        <h3>Mental Health Predictor (USA)</h3>
-        <p>Predict need for mental health treatment.</p>
-        <a href="https://mentalhealthpredictorusa.streamlit.app" target="_blank">
-            View Project
-        </a>
-    </div>
-
-    <div class="project-card">
-        <h3>KukiLabs AI</h3>
-        <p>AI tools & experimental ML apps.</p>
-        <a href="https://kukilabs.streamlit.app" target="_blank">
-            Explore
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
+### 🔹 KukiLabs  
+AI Tools & Prototypes.  
+👉 https://kukilabs.streamlit.app
+    """)
 
 
 # -------------------------------------------------------------
 # ABOUT PAGE
 # -------------------------------------------------------------
-if st.session_state.page == "About":
-    st.markdown("<div class='section'>", unsafe_allow_html=True)
+if current_page == "About":
     st.markdown("## 👨🏾‍💻 About Me")
 
     st.write("""
-I am **Mark Chweya**, Data Science & Analytics student at USIU–Africa.
+I am **Mark Chweya**, a Data Science & Analytics student at USIU–Africa.
 
-I build:
-- Machine learning applications  
-- Predictive models  
-- Interactive AI tools  
-- Modern, futuristic tech experiences  
+I build modern machine learning applications, predictive models, and AI tools
+with a futuristic African aesthetic.
 
-I'm passionate about blending **African futurism** with **cutting-edge AI** to create unique and impactful digital products.
+I combine:
+- Data Science  
+- AI Engineering  
+- UI Design  
+- African Futurism  
+
+to create memorable digital products.
     """)
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # -------------------------------------------------------------
 # RESUME PAGE
 # -------------------------------------------------------------
-if st.session_state.page == "Resume":
-    st.markdown("<div class='section'>", unsafe_allow_html=True)
+if current_page == "Resume":
     st.markdown("## 📄 Resume")
 
     st.write("""
@@ -472,13 +344,10 @@ if st.session_state.page == "Resume":
 - Moringa School — Software Programming  
 - Pioneer School — KCSE  
 
-### 🛠 Skills  
-Python, R, SQL  
-Machine Learning  
-Data Science  
-React / JavaScript  
-Streamlit  
-Predictive Modeling  
+### 🧠 Skills  
+Python • R • SQL • Machine Learning  
+Data Visualization • Predictive Analytics  
+React • Streamlit  
 
 ### 🏅 Certifications  
 - Certificate in Computer Programming  
@@ -489,36 +358,16 @@ Basketball (Lakers)
 Golf  
 
 ### 📞 Contact  
-- Email: **chweyamark@gmail.com**  
-- Phone: **+254 703 951 840**
+Email: **chweyamark@gmail.com**  
+Phone: **+254 703 951 840**
     """)
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # -------------------------------------------------------------
 # CONTACT PAGE
 # -------------------------------------------------------------
-if st.session_state.page == "Contact":
-    st.markdown("<div class='section'>", unsafe_allow_html=True)
+if current_page == "Contact":
     st.markdown("## ✉ Contact Me")
-
-    st.markdown("""
-        <style>
-        .contact-box {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,215,0,0.25);
-            padding: 30px;
-            border-radius: 16px;
-            width: 60%;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 0 20px rgba(255,215,0,0.25);
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown("<div class='contact-box'>", unsafe_allow_html=True)
 
     name = st.text_input("Your Name")
     email = st.text_input("Your Email")
@@ -526,6 +375,3 @@ if st.session_state.page == "Contact":
 
     if st.button("Send Message"):
         st.success("Message sent! (Email integration coming soon.)")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
