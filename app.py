@@ -16,13 +16,11 @@ st.set_page_config(
 st.markdown(
     """
 <style>
-/* Hide default Streamlit chrome */
 #MainMenu, footer, header {visibility: hidden;}
 [data-testid="stToolbar"] {display: none !important;}
 [data-testid="stSidebar"] {display: none !important;}
 [data-testid="stDecoration"] {display: none !important;}
 
-/* Root layout containers – force them to 100vh and hide scroll */
 html, body {
     margin: 0 !important;
     padding: 0 !important;
@@ -52,7 +50,6 @@ section.main,
 # --------------------------------------------------------
 hero_html = """
 <style>
-/* Inside iframe */
 html, body {
     margin: 0;
     padding: 0;
@@ -62,7 +59,7 @@ html, body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* HERO wraps full viewport inside iframe */
+/* HERO container */
 .hero-wrap {
     position: relative;
     width: 100%;
@@ -81,32 +78,34 @@ html, body {
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* BACKPACK NAV – upgraded look */
+/* BACKPACK NAV – draggable */
 .bag-nav {
     position: absolute;
-    top: 28px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    width: 120px;
+    height: 120px;
     z-index: 30;
     user-select: none;
 }
 
-/* backpack icon */
-.bag-icon {
-    position: relative;
+/* BACKPACK ICON */
+#bagIcon {
+    position: absolute;
+    top: 16px;
+    left: 16px;
     width: 88px;
     height: 88px;
-    cursor: pointer;
+    cursor: grab;
     border-radius: 32px;
-    background: radial-gradient(circle at 30% 0%, rgba(255,215,0,0.45), rgba(10,10,10,0.98));
+    background: radial-gradient(circle at 30% 0%, rgba(255,215,0,0.52), rgba(10,10,10,0.98));
     box-shadow:
         0 0 40px rgba(255,215,0,0.45),
         0 24px 50px rgba(0,0,0,0.9);
     backdrop-filter: blur(24px);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: box-shadow 0.25s ease;
+    transform-origin: 50% 50%;
+}
+#bagIcon:active {
+    cursor: grabbing;
 }
 
 /* bag body */
@@ -114,7 +113,7 @@ html, body {
     position: absolute;
     inset: 18px 14px 20px 14px;
     border-radius: 22px;
-    background: linear-gradient(180deg, #181818, #050505);
+    background: radial-gradient(circle at 30% 0%, #333, #050505);
     border: 1px solid rgba(255,215,0,0.4);
     box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
 }
@@ -170,18 +169,21 @@ html, body {
     box-shadow: 0 0 14px rgba(255,215,0,1);
 }
 
-/* subtle breathing animation */
-.bag-icon {
+/* breathing glow */
+#bagIcon {
     animation: bagPulse 2.8s ease-in-out infinite;
 }
 @keyframes bagPulse {
-    0%, 100% { transform: translateY(0); box-shadow: 0 0 40px rgba(255,215,0,0.35), 0 24px 50px rgba(0,0,0,0.9); }
-    50%      { transform: translateY(-3px); box-shadow: 0 0 55px rgba(255,215,0,0.55), 0 28px 60px rgba(0,0,0,1); }
+    0%, 100% { box-shadow: 0 0 40px rgba(255,215,0,0.35), 0 24px 50px rgba(0,0,0,0.9); }
+    50%      { box-shadow: 0 0 55px rgba(255,215,0,0.6), 0 28px 60px rgba(0,0,0,1); }
 }
 
-/* BAG MENU */
+/* BAG MENU (sticks to bag) */
 .bag-menu {
-    margin-top: 12px;
+    position: absolute;
+    top: 104px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px) scale(0.96);
     padding: 10px 20px;
     border-radius: 20px;
     background: rgba(7,7,7,0.96);
@@ -189,20 +191,18 @@ html, body {
     display: flex;
     gap: 18px;
     opacity: 0;
-    transform: translateY(-10px) scale(0.96);
     pointer-events: none;
     transition: opacity 0.25s ease, transform 0.25s ease;
     box-shadow: 0 18px 40px rgba(0,0,0,0.85);
     border: 1px solid rgba(255,215,0,0.15);
 }
-
 .bag-menu.open {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%) translateY(0) scale(1);
     pointer-events: auto;
 }
 
-/* items look like floating text with underline effect */
+/* floating nav items */
 .bag-item {
     position: relative;
     font-size: 16px;
@@ -215,7 +215,6 @@ html, body {
     transition: color 0.25s ease, transform 0.25s ease;
     user-select: none;
 }
-
 .bag-item::after {
     content: "";
     position: absolute;
@@ -229,7 +228,6 @@ html, body {
     box-shadow: 0 0 10px rgba(255,215,0,0.85);
     transition: width 0.25s ease;
 }
-
 .bag-item:hover {
     color: #ffffff;
     transform: translateY(-1px);
@@ -238,7 +236,7 @@ html, body {
     width: 70%;
 }
 
-/* MAIN CONTENT ROW */
+/* MAIN CONTENT */
 .center-row {
     flex: 1;
     width: 100%;
@@ -249,7 +247,7 @@ html, body {
     transform: translateY(40px);
 }
 
-/* LEFT — NAME + ROLE (with smoother animations) */
+/* LEFT TEXT */
 .hero-text {
     display: flex;
     flex-direction: column;
@@ -263,29 +261,54 @@ html, body {
 }
 
 .hero-name {
+    position: relative;
     font-size: 70px;
     font-weight: 900;
     background: linear-gradient(to right, #f6d47a, #ffffff);
     -webkit-background-clip: text;
     color: transparent;
     text-shadow: 0 0 24px rgba(246,212,122,0.4);
+    overflow: hidden;
 }
 
-/* subtitle animation – drift up + letter spacing easing */
+/* SHARP LIGHT STREAK ACROSS NAME */
+.hero-name::before {
+    content: "";
+    position: absolute;
+    top: -20%;
+    left: -130%;
+    width: 60%;
+    height: 140%;
+    background: linear-gradient(120deg,
+        rgba(0,0,0,0) 0%,
+        rgba(255,255,255,0.0) 20%,
+        rgba(255,255,255,0.75) 50%,
+        rgba(255,215,0,0.0) 80%,
+        rgba(0,0,0,0) 100%);
+    mix-blend-mode: screen;
+    filter: blur(2px);
+    animation: nameShine 3.6s ease-in-out infinite;
+}
+@keyframes nameShine {
+    from { left: -130%; }
+    to   { left: 140%; }
+}
+
+/* SUBTITLE – smaller + less spaced */
 .hero-role {
-    font-size: 28px;
+    font-size: 22px;
     color: #eaeaea;
-    margin-top: -8px;
+    margin-top: -4px;
     opacity: 0;
     transform: translateY(16px);
     filter: blur(6px);
-    letter-spacing: 0.24em;
+    letter-spacing: 0.18em;
     animation: roleIn 0.9s ease-out forwards;
     animation-delay: 0.25s;
 }
 @keyframes roleIn {
-    from { opacity: 0; transform: translateY(16px); filter: blur(6px); letter-spacing: 0.24em; }
-    to   { opacity: 1; transform: translateY(0);  filter: blur(0);  letter-spacing: 0.04em; }
+    from { opacity: 0; transform: translateY(16px); filter: blur(6px); letter-spacing: 0.18em; }
+    to   { opacity: 1; transform: translateY(0);  filter: blur(0);  letter-spacing: 0.05em; }
 }
 
 /* RIGHT — AVATAR */
@@ -303,10 +326,10 @@ html, body {
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* BACKGROUND CANVASES (fill full viewport) */
-#ringsCanvas, #adinkraCanvas {
+/* BACKGROUND CANVASES */
+#codeCanvas, #ringsCanvas {
     position: absolute;
-    left: 0; 
+    left: 0;
     top: 0;
     width: 100%;
     height: 100%;
@@ -314,8 +337,8 @@ html, body {
     opacity: 0;
     animation: bgIn 0.9s ease-out forwards;
 }
-#adinkraCanvas { animation-delay: 0.15s; }
-#ringsCanvas   { animation-delay: 0.25s; }
+#codeCanvas { animation-delay: 0.1s; }
+#ringsCanvas { animation-delay: 0.25s; }
 
 @keyframes bgIn {
     from { opacity: 0; filter: blur(4px); }
@@ -325,9 +348,9 @@ html, body {
 
 <div class="hero-wrap">
 
-    <!-- BACKPACK NAV -->
-    <div class="bag-nav">
-        <div class="bag-icon" onclick="toggleBagMenu()">
+    <!-- DRAGGABLE BACKPACK + MENU -->
+    <div class="bag-nav" id="bagNav">
+        <div id="bagIcon">
             <div class="bag-body"></div>
             <div class="bag-pocket"></div>
             <div class="bag-flap"></div>
@@ -344,22 +367,18 @@ html, body {
         </div>
     </div>
 
-    <!-- BACKGROUND ANIMATIONS -->
-    <canvas id="adinkraCanvas"></canvas>
+    <!-- BACKGROUND TECH + RINGS -->
+    <canvas id="codeCanvas"></canvas>
     <canvas id="ringsCanvas"></canvas>
 
     <!-- CENTERED CONTENT -->
     <div class="center-row">
-        <!-- NAME + ROLE -->
         <div class="hero-text">
             <div class="hero-name">Mark Chweya</div>
             <div class="hero-role">Data Science &amp; Artificial Intelligence</div>
         </div>
-
-        <!-- AVATAR -->
         <canvas id="avatarCanvas"></canvas>
     </div>
-
 </div>
 
 <!-- THREE.JS -->
@@ -367,7 +386,7 @@ html, body {
 <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
-/* Make iframe always exactly viewport height → no outer scroll */
+/* Make iframe match viewport height */
 function resizeFrame() {
     try {
         if (window.frameElement) {
@@ -379,7 +398,7 @@ window.addEventListener("load", resizeFrame);
 window.addEventListener("resize", resizeFrame);
 resizeFrame();
 
-/* Helper: fit canvases */
+/* Generic canvas resize */
 function fitCanvas(c){
     const w = c.clientWidth, h = c.clientHeight;
     if (c.width !== w || c.height !== h) {
@@ -388,63 +407,194 @@ function fitCanvas(c){
     }
 }
 
-/* ------------------ BACKPACK MENU TOGGLE ------------------ */
+/* ------------------ DRAGGABLE / PHYSICS BACKPACK ------------------ */
+const bagNav = document.getElementById("bagNav");
+const bagIcon = document.getElementById("bagIcon");
+const bagMenu = document.getElementById("bagMenu");
+
+let bagX = window.innerWidth / 2 - 60;
+let bagY = 20;
+bagNav.style.left = bagX + "px";
+bagNav.style.top = bagY + "px";
+
+let vx = 0, vy = 0;
+let draggingBag = false;
+let dragOffsetX = 0, dragOffsetY = 0;
+let lastMouseX = 0, lastMouseY = 0;
+let lastMoveTime = 0;
+let clickCandidate = false;
+let totalDragDist = 0;
+
 function toggleBagMenu(){
-    const menu = document.getElementById("bagMenu");
-    menu.classList.toggle("open");
+    bagMenu.classList.toggle("open");
 }
 
-/* ------------------ ADINKRA PARTICLES ------------------ */
-const aCanvas = document.getElementById("adinkraCanvas");
-const actx = aCanvas.getContext("2d");
-const symbols = ["✺","✤","❂"];
-let adinkra = [];
+bagIcon.addEventListener("mousedown", (e) => {
+    draggingBag = true;
+    clickCandidate = true;
+    totalDragDist = 0;
+    vx = vy = 0;
+    dragOffsetX = e.clientX - bagX;
+    dragOffsetY = e.clientY - bagY;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+    lastMoveTime = Date.now();
+});
 
-function initAdinkra(){
-    fitCanvas(aCanvas);
-    adinkra = [];
-    for(let i=0;i<26;i++){
-        adinkra.push({
-            x: Math.random()*aCanvas.width,
-            y: Math.random()*aCanvas.height,
-            size: 10 + Math.random()*6,
-            speed: 0.3 + Math.random()*0.4,
-            char: symbols[Math.floor(Math.random()*symbols.length)]
+window.addEventListener("mousemove", (e) => {
+    if (!draggingBag) return;
+    const now = Date.now();
+    const dt = Math.max(now - lastMoveTime, 1);
+    const dx = e.clientX - lastMouseX;
+    const dy = e.clientY - lastMouseY;
+
+    bagX = e.clientX - dragOffsetX;
+    bagY = e.clientY - dragOffsetY;
+
+    bagNav.style.left = bagX + "px";
+    bagNav.style.top = bagY + "px";
+
+    vx = dx / dt * 16;
+    vy = dy / dt * 16;
+
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+    lastMoveTime = now;
+
+    totalDragDist += Math.sqrt(dx*dx + dy*dy);
+    if (totalDragDist > 5) clickCandidate = false;
+});
+
+window.addEventListener("mouseup", () => {
+    if (draggingBag && clickCandidate) {
+        toggleBagMenu();
+    }
+    draggingBag = false;
+});
+
+/* FLOATING physics (no gravity, just inertia + bounces) */
+function animateBag(){
+    const padding = 10;
+    if (!draggingBag) {
+        // no gravity – just inertia + friction
+        bagX += vx;
+        bagY += vy;
+
+        const maxX = window.innerWidth - bagNav.offsetWidth - padding;
+        const maxY = window.innerHeight - bagNav.offsetHeight - padding;
+
+        if (bagX < padding) {
+            bagX = padding;
+            vx = -vx * 0.7;
+        } else if (bagX > maxX) {
+            bagX = maxX;
+            vx = -vx * 0.7;
+        }
+        if (bagY < padding) {
+            bagY = padding;
+            vy = -vy * 0.7;
+        } else if (bagY > maxY) {
+            bagY = maxY;
+            vy = -vy * 0.7;
+        }
+
+        // friction
+        vx *= 0.985;
+        vy *= 0.985;
+
+        bagNav.style.left = bagX + "px";
+        bagNav.style.top = bagY + "px";
+
+        const angle = vx * 1.2;
+        bagIcon.style.transform = "rotate(" + angle + "deg)";
+    }
+    requestAnimationFrame(animateBag);
+}
+animateBag();
+
+/* ------------------ CODE / DATA BACKGROUND (UNIQUE TOKENS) ------------------ */
+const codeCanvas = document.getElementById("codeCanvas");
+const codeCtx = codeCanvas.getContext("2d");
+
+let codeParticles = [];
+
+function randomToken() {
+    const chars = "01xyzλΣμσπ∂µσπ{}()[]+-*/<>:=._#";
+    const len = 3 + Math.floor(Math.random() * 6);
+    let s = "";
+    for (let i = 0; i < len; i++) {
+        s += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return s;
+}
+
+function generateUniqueToken(existingTokens) {
+    let token;
+    do {
+        token = randomToken();
+    } while (existingTokens.indexOf(token) !== -1);
+    return token;
+}
+
+function initCode(){
+    fitCanvas(codeCanvas);
+    codeParticles = [];
+    const count = 40;
+    for (let i = 0; i < count; i++){
+        const existing = codeParticles.map(p => p.token);
+        codeParticles.push({
+            x: Math.random() * codeCanvas.width,
+            y: Math.random() * codeCanvas.height,
+            speed: 0.3 + Math.random() * 0.7,
+            size: 10 + Math.random() * 6,
+            token: generateUniqueToken(existing),
+            alpha: 0.25 + Math.random() * 0.4
         });
     }
 }
-function animateAdinkra(){
-    fitCanvas(aCanvas);
-    actx.clearRect(0,0,aCanvas.width,aCanvas.height);
-    actx.fillStyle = "rgba(255,215,0,0.9)";
-    adinkra.forEach(s=>{
-        actx.font = s.size + "px serif";
-        actx.fillText(s.char, s.x, s.y);
-        s.y -= s.speed;
-        if(s.y < -20){
-            s.y = aCanvas.height + 20;
-            s.x = Math.random()*aCanvas.width;
+
+function animateCode(){
+    fitCanvas(codeCanvas);
+    codeCtx.clearRect(0,0,codeCanvas.width,codeCanvas.height);
+    const existingNow = codeParticles.map(p => p.token);
+
+    codeParticles.forEach((p, idx) => {
+        codeCtx.font = p.size + "px 'JetBrains Mono', monospace";
+        codeCtx.fillStyle = "rgba(255,215,0," + p.alpha + ")";
+        codeCtx.fillText(p.token, p.x, p.y);
+
+        p.y += p.speed;
+        p.x += p.speed * 0.1;
+
+        if (p.y > codeCanvas.height + 40) {
+            p.y = -20;
+            p.x = Math.random() * codeCanvas.width;
+
+            // regenerate a brand new unique token
+            const others = codeParticles
+                .filter((_, j) => j !== idx)
+                .map(q => q.token);
+            p.token = generateUniqueToken(others);
         }
     });
-    requestAnimationFrame(animateAdinkra);
+    requestAnimationFrame(animateCode);
 }
-initAdinkra();
-animateAdinkra();
+initCode();
+animateCode();
 
-/* ------------------ RINGS – all rotating, different speeds & directions ------------------ */
+/* ------------------ RINGS – rotating with different speeds ------------------ */
 const rCanvas = document.getElementById("ringsCanvas");
 const rctx = rCanvas.getContext("2d");
 
 function animateRings(){
     fitCanvas(rCanvas);
-    const w=rCanvas.width, h=rCanvas.height;
+    const w = rCanvas.width, h = rCanvas.height;
     rctx.clearRect(0,0,w,h);
 
     const cx = w * 0.70;
     const cy = h * 0.64;
-    const t  = Date.now() * 0.00004;  // global time
+    const t  = Date.now() * 0.00004;
 
-    // three rings, each with its own speed + direction
     const speeds = [0.6, -0.4, 0.25];
 
     for (let i=0;i<3;i++){
@@ -453,7 +603,7 @@ function animateRings(){
 
         rctx.save();
         rctx.translate(cx,cy);
-        rctx.rotate(t * speeds[i]);  // slow rotation, each different
+        rctx.rotate(t * speeds[i]);
         rctx.beginPath();
         rctx.arc(0, 0, R, 0, Math.PI*2);
         rctx.strokeStyle = "rgba(255,215,0," + alpha + ")";
@@ -465,7 +615,7 @@ function animateRings(){
 }
 animateRings();
 
-/* ------------------ 3D AVATAR – brighter + more visible ------------------ */
+/* ------------------ 3D AVATAR ------------------ */
 const avatarCanvas = document.getElementById("avatarCanvas");
 const renderer = new THREE.WebGLRenderer({canvas: avatarCanvas, alpha:true});
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -474,22 +624,19 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
 camera.position.set(0, 1.1, 2.5);
 
-/* KEY LIGHT – strong from front-right */
+/* Lights */
 const keyLight = new THREE.DirectionalLight(0xffffff, 2.1);
 keyLight.position.set(2.4, 3.2, 4.0);
 scene.add(keyLight);
 
-/* FILL LIGHT – from left to soften shadows */
 const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
 fillLight.position.set(-2.0, 2.5, 1.8);
 scene.add(fillLight);
 
-/* RIM LIGHT – from behind for outline */
 const rimLight = new THREE.DirectionalLight(0xffd980, 0.8);
 rimLight.position.set(-2.5, 1.5, -3.0);
 scene.add(rimLight);
 
-/* AMBIENT – lift everything */
 const ambient = new THREE.AmbientLight(0xffffff, 0.9);
 scene.add(ambient);
 
@@ -505,17 +652,14 @@ loader.load(
         scene.add(avatar);
     },
     undefined,
-    err => {
-        console.error("Error loading avatar:", err);
-    }
+    err => { console.error("Error loading avatar:", err); }
 );
 
-// Mouse drag to control spin speed
-let dragging = false, prevX = 0, rot = 0.004;
-avatarCanvas.addEventListener("mousedown", e => { dragging = true; prevX = e.clientX; });
-window.addEventListener("mouseup", () => { dragging = false; });
+let draggingAvatar = False = false, prevX = 0, rot = 0.004;
+avatarCanvas.addEventListener("mousedown", e => { draggingAvatar = true; prevX = e.clientX; });
+window.addEventListener("mouseup", () => { draggingAvatar = false; });
 window.addEventListener("mousemove", e => {
-    if (dragging && avatar) {
+    if (draggingAvatar && avatar) {
         rot = (e.clientX - prevX) * 0.0004;
         prevX = e.clientX;
     }
@@ -523,21 +667,19 @@ window.addEventListener("mousemove", e => {
 
 function animateAvatar(){
     requestAnimationFrame(animateAvatar);
-
     if (avatar) avatar.rotation.y += rot;
     renderer.setSize(avatarCanvas.clientWidth, avatarCanvas.clientHeight);
     renderer.render(scene, camera);
 }
 animateAvatar();
 
-/* NAV MENU → STREAMLIT PANELS */
+/* STREAMLIT PANEL MESSAGES */
 function sendPanel(name){
     window.parent.postMessage({panel: name}, "*");
 }
 </script>
 """
 
-# Initial height is arbitrary; JS inside iframe resizes it to viewport height
 components.html(hero_html, height=600, scrolling=False)
 
 # --------------------------------------------------------
@@ -631,7 +773,7 @@ panels = {
     "About": panel_html(
         "About Me",
         """
-        I am <b>Mark Chweya</b>, a Data Science & AI developer building predictive models,
+        I am <b>Mark Chweya</b>, a Data Science &amp; AI developer building predictive models,
         analytics pipelines, and futuristic African UI experiences.
         """,
     ),
