@@ -64,7 +64,7 @@ html, body {
     position: relative;
     width: 100%;
     height: 100vh;
-    background: #0d0f13;
+    background: radial-gradient(circle at 20% 0%, #161922, #050609);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -73,6 +73,22 @@ html, body {
     animation: heroIn 0.8s ease-out forwards;
     opacity: 0;
 }
+
+/* global glossy overlay */
+.hero-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 0%, rgba(255,255,255,0.08), transparent 55%),
+        radial-gradient(circle at 80% 100%, rgba(255,215,0,0.12), transparent 55%),
+        linear-gradient(120deg, rgba(255,255,255,0.04), rgba(255,255,255,0.0) 40%);
+    mix-blend-mode: screen;
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 0;
+}
+
 @keyframes heroIn {
     from { opacity: 0; transform: translateY(10px) scale(0.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -96,12 +112,14 @@ html, body {
     height: 88px;
     cursor: grab;
     border-radius: 32px;
-    background: radial-gradient(circle at 30% 0%, rgba(255,215,0,0.52), rgba(10,10,10,0.98));
+    background:
+        radial-gradient(circle at 30% 0%, rgba(255,215,0,0.70), rgba(10,10,10,0.98));
     box-shadow:
-        0 0 40px rgba(255,215,0,0.45),
-        0 24px 50px rgba(0,0,0,0.9);
+        0 0 45px rgba(255,215,0,0.55),
+        0 24px 50px rgba(0,0,0,0.9),
+        inset 0 0 16px rgba(0,0,0,0.9);
     backdrop-filter: blur(24px);
-    transition: box-shadow 0.25s ease;
+    transition: box-shadow 0.25s ease, transform 0.15s ease;
     transform-origin: 50% 50%;
 }
 #bagIcon:active {
@@ -113,9 +131,11 @@ html, body {
     position: absolute;
     inset: 18px 14px 20px 14px;
     border-radius: 22px;
-    background: radial-gradient(circle at 30% 0%, #333, #050505);
-    border: 1px solid rgba(255,215,0,0.4);
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+    background: radial-gradient(circle at 30% 0%, #3a3a3a, #050505);
+    border: 1px solid rgba(255,215,0,0.45);
+    box-shadow:
+        inset 0 0 20px rgba(0,0,0,0.9),
+        0 0 16px rgba(255,255,255,0.08);
 }
 
 /* pocket */
@@ -126,8 +146,8 @@ html, body {
     bottom: 18px;
     height: 22px;
     border-radius: 12px;
-    background: linear-gradient(180deg, #252525, #111111);
-    border: 1px solid rgba(255,215,0,0.4);
+    background: linear-gradient(180deg, #2b2b2b, #101010);
+    border: 1px solid rgba(255,215,0,0.45);
 }
 
 /* flap */
@@ -138,8 +158,8 @@ html, body {
     right: 20px;
     height: 20px;
     border-radius: 16px 16px 12px 12px;
-    background: linear-gradient(180deg, #303030, #151515);
-    border: 1px solid rgba(255,215,0,0.45);
+    background: linear-gradient(180deg, #3a3a3a, #181818);
+    border: 1px solid rgba(255,215,0,0.5);
 }
 
 /* straps */
@@ -150,7 +170,7 @@ html, body {
     width: 14px;
     height: 20px;
     border-radius: 999px;
-    border: 2px solid rgba(255,215,0,0.6);
+    border: 2px solid rgba(255,215,0,0.7);
     border-bottom: none;
 }
 .bag-strap-left { left: 20px; }
@@ -165,8 +185,10 @@ html, body {
     width: 7px;
     height: 7px;
     border-radius: 999px;
-    background: rgba(255,215,0,0.95);
-    box-shadow: 0 0 14px rgba(255,215,0,1);
+    background: rgba(255,215,0,0.98);
+    box-shadow:
+        0 0 14px rgba(255,215,0,1),
+        0 0 40px rgba(255,215,0,0.7);
 }
 
 /* breathing glow */
@@ -174,8 +196,18 @@ html, body {
     animation: bagPulse 2.8s ease-in-out infinite;
 }
 @keyframes bagPulse {
-    0%, 100% { box-shadow: 0 0 40px rgba(255,215,0,0.35), 0 24px 50px rgba(0,0,0,0.9); }
-    50%      { box-shadow: 0 0 55px rgba(255,215,0,0.6), 0 28px 60px rgba(0,0,0,1); }
+    0%, 100% {
+        box-shadow:
+            0 0 38px rgba(255,215,0,0.45),
+            0 24px 50px rgba(0,0,0,0.9),
+            inset 0 0 12px rgba(0,0,0,0.8);
+    }
+    50% {
+        box-shadow:
+            0 0 60px rgba(255,215,0,0.8),
+            0 28px 60px rgba(0,0,0,1),
+            inset 0 0 18px rgba(0,0,0,0.9);
+    }
 }
 
 /* BAG MENU (sticks to bag) */
@@ -186,20 +218,29 @@ html, body {
     transform: translateX(-50%) translateY(-10px) scale(0.96);
     padding: 10px 20px;
     border-radius: 20px;
-    background: rgba(7,7,7,0.96);
+    background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.18), rgba(7,7,7,0.99));
     backdrop-filter: blur(18px);
     display: flex;
     gap: 18px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.85);
-    /* border removed for flawless look */
+    transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.3s ease;
+    box-shadow:
+        0 18px 40px rgba(0,0,0,0.85),
+        0 0 24px rgba(255,215,0,0.28);
 }
 .bag-menu.open {
     opacity: 1;
     transform: translateX(-50%) translateY(0) scale(1);
     pointer-events: auto;
+}
+
+/* border hit glow */
+.bag-hit-glow {
+    box-shadow:
+        0 0 32px rgba(255,215,0,0.95),
+        0 0 90px rgba(255,215,0,0.55),
+        0 20px 60px rgba(0,0,0,0.9) !important;
 }
 
 /* floating nav items */
@@ -245,6 +286,8 @@ html, body {
     align-items: center;
     gap: 140px;
     transform: translateY(40px);
+    position: relative;
+    z-index: 2;
 }
 
 /* LEFT TEXT */
@@ -267,8 +310,38 @@ html, body {
     background: linear-gradient(to right, #f6d47a, #ffffff);
     -webkit-background-clip: text;
     color: transparent;
-    text-shadow: 0 0 24px rgba(246,212,122,0.4);
+    text-shadow:
+        0 0 24px rgba(246,212,122,0.4),
+        0 0 40px rgba(0,0,0,0.9);
     overflow: hidden;
+}
+
+/* CODE FEED LAYER BEHIND NAME */
+.hero-name::after {
+    content: "01λΣµσπ{}[]<>/\\\\|=_+*# 01λΣµσπ{}[]<>/\\\\|=_+*#";
+    position: absolute;
+    inset: -4px 0;
+    background: linear-gradient(120deg,
+        rgba(0,0,0,0),
+        rgba(255,215,0,0.7),
+        rgba(255,255,255,0.8),
+        rgba(0,0,0,0));
+    mix-blend-mode: screen;
+    opacity: 0.55;
+    pointer-events: none;
+    animation: nameCodeFlow 4s linear infinite;
+    -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,1), rgba(0,0,0,0.5), rgba(0,0,0,0));
+    mask-image: linear-gradient(90deg, rgba(0,0,0,1), rgba(0,0,0,0.5), rgba(0,0,0,0));
+}
+@keyframes nameCodeFlow {
+    from { transform: translateX(22px); }
+    to   { transform: translateX(-22px); }
+}
+
+/* once decoded, name "sheds" the code feed */
+.hero-name.decoded::after {
+    opacity: 0;
+    transition: opacity 0.55s ease-out;
 }
 
 /* SHARP LIGHT STREAK ACROSS NAME – only when .shine class is present */
@@ -326,8 +399,18 @@ html, body {
     animation-delay: 0.2s;
 }
 @keyframes avatarIn {
-    from { opacity: 0; transform: translateY(25px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(25px) scale(0.93); }
+    to   { opacity: 1; transform: translateY(0) scale(0.98); }
+}
+
+/* EXTRA SYNC ANIMATION WHEN NAME FINISHES */
+#avatarCanvas.avatar-pulse {
+    animation: avatarLink 0.9s ease-out;
+}
+@keyframes avatarLink {
+    0%   { transform: translateY(0px) scale(0.98); }
+    45%  { transform: translateY(-10px) scale(1.05); }
+    100% { transform: translateY(0px) scale(1.0); }
 }
 
 /* BACKGROUND CANVASES */
@@ -337,7 +420,7 @@ html, body {
     top: 0;
     width: 100%;
     height: 100%;
-    z-index: 0;
+    z-index: 1;
     opacity: 0;
     animation: bgIn 0.9s ease-out forwards;
 }
@@ -476,9 +559,15 @@ window.addEventListener("mouseup", () => {
     draggingBag = false;
 });
 
+/* glow when border is hit */
+function triggerHitGlow() {
+    const target = bagMenu.classList.contains("open") ? bagMenu : bagIcon;
+    if (!target) return;
+    target.classList.add("bag-hit-glow");
+    setTimeout(() => target.classList.remove("bag-hit-glow"), 220);
+}
+
 /* FLOATING physics (no gravity, just inertia + bounces) */
-/* When menu is open near edges, push inward so the full menu is visible,
-   while still behaving like a bouncing ball. */
 function animateBag(){
     const padding = 10;
     if (!draggingBag) {
@@ -491,23 +580,25 @@ function animateBag(){
         let maxX = window.innerWidth - navW - padding;
         let maxY = window.innerHeight - navH - padding;
 
-        // Basic border bounces for the bag itself
         if (bagX < padding) {
             bagX = padding;
             vx = -vx * 0.7;
+            triggerHitGlow();
         } else if (bagX > maxX) {
             bagX = maxX;
             vx = -vx * 0.7;
+            triggerHitGlow();
         }
         if (bagY < padding) {
             bagY = padding;
             vy = -vy * 0.7;
+            triggerHitGlow();
         } else if (bagY > maxY) {
             bagY = maxY;
             vy = -vy * 0.7;
+            triggerHitGlow();
         }
 
-        // If menu is open, ensure it doesn't clip out of screen horizontally
         if (bagMenu.classList.contains("open")) {
             const vw = window.innerWidth;
             const menuHalf = (bagMenu.offsetWidth || 200) / 2;
@@ -522,11 +613,11 @@ function animateBag(){
 
             if (pushX !== 0) {
                 bagX += pushX;
-                vx = -vx * 0.7;  // bounce feeling when it corrects
+                vx = -vx * 0.7;
+                triggerHitGlow();
             }
         }
 
-        // friction to slowly stop
         vx *= 0.985;
         vy *= 0.985;
 
@@ -608,7 +699,7 @@ function animateCode(){
 initCode();
 animateCode();
 
-/* ------------------ RINGS – rotating with different speeds ------------------ */
+/* ------------------ RINGS – MORE VISIBLE ROTATION ------------------ */
 const rCanvas = document.getElementById("ringsCanvas");
 const rctx = rCanvas.getContext("2d");
 
@@ -619,13 +710,13 @@ function animateRings(){
 
     const cx = w * 0.70;
     const cy = h * 0.64;
-    const t  = Date.now() * 0.00004;
+    const t  = Date.now() * 0.00010;
 
-    const speeds = [0.6, -0.4, 0.25];
+    const speeds = [0.8, -0.6, 0.35];
 
     for (let i=0;i<3;i++){
         const R = 130 + i*40;
-        const alpha = 0.35 - i*0.1;
+        const alpha = 0.38 - i*0.09;
 
         rctx.save();
         rctx.translate(cx,cy);
@@ -650,7 +741,6 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
 camera.position.set(0, 1.1, 2.5);
 
-/* Lights */
 const keyLight = new THREE.DirectionalLight(0xffffff, 2.1);
 keyLight.position.set(2.4, 3.2, 4.0);
 scene.add(keyLight);
@@ -681,8 +771,14 @@ loader.load(
     err => { console.error("Error loading avatar:", err); }
 );
 
-let draggingAvatar = false, prevX = 0, rot = 0.004;
-avatarCanvas.addEventListener("mousedown", e => { draggingAvatar = true; prevX = e.clientX; });
+let draggingAvatar = false, prevX = 0;
+let rot = 0.01;
+let avatarActive = false;  // starts rotating only after name decodes
+
+avatarCanvas.addEventListener("mousedown", e => {
+    draggingAvatar = true;
+    prevX = e.clientX;
+});
 window.addEventListener("mouseup", () => { draggingAvatar = false; });
 window.addEventListener("mousemove", e => {
     if (draggingAvatar && avatar) {
@@ -693,15 +789,95 @@ window.addEventListener("mousemove", e => {
 
 function animateAvatar(){
     requestAnimationFrame(animateAvatar);
-    if (avatar) avatar.rotation.y += rot;
+    if (avatar && avatarActive) {
+        avatar.rotation.y += rot;
+    }
     renderer.setSize(avatarCanvas.clientWidth, avatarCanvas.clientHeight);
     renderer.render(scene, camera);
 }
 animateAvatar();
 
-/* ------------------ OCCASIONAL NAME SHINE ------------------ */
+/* ------------------ CODED TEXT REVEAL FOR NAME + ROLE ------------------ */
 const heroNameEl = document.querySelector('.hero-name');
+const heroRoleEl = document.querySelector('.hero-role');
+const CODE_CHARS = "01xyzλΣµσπ{}[]<>/\\\\|=_+*#";
 
+function randomCodeStringFromTemplate(template) {
+    let out = "";
+    for (let i = 0; i < template.length; i++) {
+        const ch = template[i];
+        if (ch === " ") {
+            out += " ";
+        } else {
+            out += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
+        }
+    }
+    return out;
+}
+
+function runCodeEffect(el, targetText, totalDurationMs, onDone) {
+    if (!el) return;
+    const len = targetText.length;
+    let idx = 0;
+    const interval = totalDurationMs / Math.max(len, 1);
+
+    const timer = setInterval(() => {
+        let out = "";
+        for (let i = 0; i < len; i++) {
+            const ch = targetText[i];
+            if (ch === " ") {
+                out += " ";
+            } else if (i <= idx) {
+                out += ch;
+            } else {
+                out += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
+            }
+        }
+        el.textContent = out;
+        idx++;
+        if (idx >= len) {
+            el.textContent = targetText;
+            clearInterval(timer);
+            if (onDone) onDone();
+        }
+    }, interval);
+}
+
+/* Start both as pure code noise – name "fed by code" */
+if (heroNameEl) {
+    heroNameEl.textContent = randomCodeStringFromTemplate("Mark Chweya");
+}
+if (heroRoleEl) {
+    heroRoleEl.textContent = randomCodeStringFromTemplate("Data Science & Artificial Intelligence");
+}
+
+/* When name finishes: avatar reacts, rotation starts, name sheds code layer */
+setTimeout(() => {
+    runCodeEffect(
+        heroNameEl,
+        "Mark Chweya",
+        3200,
+        () => {
+            avatarActive = true;
+            const canvasEl = document.getElementById("avatarCanvas");
+            if (canvasEl) {
+                canvasEl.classList.add("avatar-pulse");
+                setTimeout(() => canvasEl.classList.remove("avatar-pulse"), 900);
+            }
+            if (heroNameEl) {
+                heroNameEl.classList.add("decoded");
+            }
+        }
+    );
+    runCodeEffect(
+        heroRoleEl,
+        "Data Science & Artificial Intelligence",
+        3600,
+        null
+    );
+}, 750);
+
+/* ------------------ OCCASIONAL NAME SHINE ------------------ */
 function triggerShineOnce() {
     if (!heroNameEl) return;
     heroNameEl.classList.add('shine');
@@ -710,14 +886,13 @@ function triggerShineOnce() {
     }, 3800);
 }
 
-// First shine a bit after load, then random intervals
 setTimeout(() => {
     triggerShineOnce();
     setInterval(() => {
-        const extraDelay = Math.random() * 6000; // 0–6s extra
+        const extraDelay = Math.random() * 6000;
         setTimeout(triggerShineOnce, extraDelay);
     }, 12000);
-}, 2500);
+}, 4300);
 
 /* STREAMLIT PANEL MESSAGES */
 function sendPanel(name){
@@ -739,12 +914,13 @@ panel_engine = """
     left:100vw;
     width:100vw;
     height:100vh;
-    background:rgba(10,10,10,0.85);
-    backdrop-filter:blur(20px);
+    background:rgba(5,5,8,0.90);
+    backdrop-filter:blur(26px);
     transition:0.3s ease;
     z-index:99999999;
     padding:120px;
     color:white;
+    box-shadow: 0 0 40px rgba(0,0,0,0.85);
 }
 .panel.active { left:0; }
 
@@ -763,6 +939,7 @@ panel_engine = """
     background:linear-gradient(to right,#f6d47a,#fff);
     -webkit-background-clip:text;
     color:transparent;
+    text-shadow:0 0 24px rgba(0,0,0,0.9);
 }
 
 .panel-body {
