@@ -78,7 +78,7 @@ html, body {
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* BACKPACK NAV – draggable */
+/* BACKPACK NAV – draggable wrapper */
 .bag-nav {
     position: absolute;
     width: 120px;
@@ -194,7 +194,7 @@ html, body {
     pointer-events: none;
     transition: opacity 0.25s ease, transform 0.25s ease;
     box-shadow: 0 18px 40px rgba(0,0,0,0.85);
-    border: 1px solid rgba(255,215,0,0.15);
+    /* border removed for flawless look */
 }
 .bag-menu.open {
     opacity: 1;
@@ -271,7 +271,7 @@ html, body {
     overflow: hidden;
 }
 
-/* SHARP LIGHT STREAK ACROSS NAME */
+/* SHARP LIGHT STREAK ACROSS NAME – only when .shine class is present */
 .hero-name::before {
     content: "";
     position: absolute;
@@ -287,7 +287,11 @@ html, body {
         rgba(0,0,0,0) 100%);
     mix-blend-mode: screen;
     filter: blur(2px);
-    animation: nameShine 3.6s ease-in-out infinite;
+    opacity: 0;
+}
+.hero-name.shine::before {
+    opacity: 1;
+    animation: nameShine 3.6s ease-in-out forwards;
 }
 @keyframes nameShine {
     from { left: -130%; }
@@ -473,16 +477,21 @@ window.addEventListener("mouseup", () => {
 });
 
 /* FLOATING physics (no gravity, just inertia + bounces) */
+/* When menu is open near edges, push inward so the full menu is visible,
+   while still behaving like a bouncing ball. */
 function animateBag(){
     const padding = 10;
     if (!draggingBag) {
-        // no gravity – just inertia + friction
         bagX += vx;
         bagY += vy;
 
-        const maxX = window.innerWidth - bagNav.offsetWidth - padding;
-        const maxY = window.innerHeight - bagNav.offsetHeight - padding;
+        const navW = bagNav.offsetWidth || 120;
+        const navH = bagNav.offsetHeight || 120;
 
+        let maxX = window.innerWidth - navW - padding;
+        let maxY = window.innerHeight - navH - padding;
+
+        // Basic border bounces for the bag itself
         if (bagX < padding) {
             bagX = padding;
             vx = -vx * 0.7;
@@ -498,7 +507,26 @@ function animateBag(){
             vy = -vy * 0.7;
         }
 
-        // friction
+        // If menu is open, ensure it doesn't clip out of screen horizontally
+        if (bagMenu.classList.contains("open")) {
+            const vw = window.innerWidth;
+            const menuHalf = (bagMenu.offsetWidth || 200) / 2;
+            const bagCenterX = bagX + navW / 2;
+            let pushX = 0;
+
+            if (bagCenterX - menuHalf < padding) {
+                pushX = padding - (bagCenterX - menuHalf);
+            } else if (bagCenterX + menuHalf > vw - padding) {
+                pushX = (vw - padding) - (bagCenterX + menuHalf);
+            }
+
+            if (pushX !== 0) {
+                bagX += pushX;
+                vx = -vx * 0.7;  // bounce feeling when it corrects
+            }
+        }
+
+        // friction to slowly stop
         vx *= 0.985;
         vy *= 0.985;
 
@@ -556,7 +584,6 @@ function initCode(){
 function animateCode(){
     fitCanvas(codeCanvas);
     codeCtx.clearRect(0,0,codeCanvas.width,codeCanvas.height);
-    const existingNow = codeParticles.map(p => p.token);
 
     codeParticles.forEach((p, idx) => {
         codeCtx.font = p.size + "px 'JetBrains Mono', monospace";
@@ -570,7 +597,6 @@ function animateCode(){
             p.y = -20;
             p.x = Math.random() * codeCanvas.width;
 
-            // regenerate a brand new unique token
             const others = codeParticles
                 .filter((_, j) => j !== idx)
                 .map(q => q.token);
@@ -655,7 +681,7 @@ loader.load(
     err => { console.error("Error loading avatar:", err); }
 );
 
-let draggingAvatar = False = false, prevX = 0, rot = 0.004;
+let draggingAvatar = false, prevX = 0, rot = 0.004;
 avatarCanvas.addEventListener("mousedown", e => { draggingAvatar = true; prevX = e.clientX; });
 window.addEventListener("mouseup", () => { draggingAvatar = false; });
 window.addEventListener("mousemove", e => {
@@ -672,6 +698,26 @@ function animateAvatar(){
     renderer.render(scene, camera);
 }
 animateAvatar();
+
+/* ------------------ OCCASIONAL NAME SHINE ------------------ */
+const heroNameEl = document.querySelector('.hero-name');
+
+function triggerShineOnce() {
+    if (!heroNameEl) return;
+    heroNameEl.classList.add('shine');
+    setTimeout(() => {
+        heroNameEl.classList.remove('shine');
+    }, 3800);
+}
+
+// First shine a bit after load, then random intervals
+setTimeout(() => {
+    triggerShineOnce();
+    setInterval(() => {
+        const extraDelay = Math.random() * 6000; // 0–6s extra
+        setTimeout(triggerShineOnce, extraDelay);
+    }, 12000);
+}, 2500);
 
 /* STREAMLIT PANEL MESSAGES */
 function sendPanel(name){
