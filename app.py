@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 # --------------------------------------------------------
-# GLOBAL CSS – REMOVE STREAMLIT PADDING + SCROLLBAR
+# GLOBAL CSS – LOCK APP TO 100vh, NO SCROLL
 # --------------------------------------------------------
 st.markdown(
     """
@@ -22,23 +22,25 @@ st.markdown(
 [data-testid="stSidebar"] {display: none !important;}
 [data-testid="stDecoration"] {display: none !important;}
 
-/* Remove padding from the main app area */
-[data-testid="stAppViewContainer"] {
-    padding: 0 !important;
-}
-
-.main, .block-container {
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-}
-
-/* Kill page scrolling completely */
+/* Root layout containers – force them to 100vh and hide scroll */
 html, body {
     margin: 0 !important;
     padding: 0 !important;
+    height: 100vh !important;
     overflow: hidden !important;
     background: #0d0f13 !important;
+}
+
+#root,
+[data-testid="stAppViewContainer"],
+section.main,
+.block-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
 }
 </style>
 """,
@@ -50,22 +52,21 @@ html, body {
 # --------------------------------------------------------
 hero_html = """
 <style>
-/* Reset inside iframe */
+/* Inside iframe */
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: 100vh;
     background: #0d0f13;
     overflow: hidden;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* FULLSCREEN HERO INSIDE IFRAME (fills the iframe height) */
+/* HERO wraps full viewport inside iframe */
 .hero-wrap {
     position: relative;
     width: 100%;
-    height: 100%;
-    min-height: 100%;
+    height: 100vh;
     background: #0d0f13;
     display: flex;
     flex-direction: column;
@@ -74,28 +75,82 @@ html, body {
     overflow: hidden;
 }
 
-/* NAVBAR */
+/* NAVBAR – glassy, with separators + glow */
 .navbar {
-    margin-top: 20px;
-    display: flex;
-    gap: 40px;
-    padding: 10px 40px;
-    background: rgba(25,25,25,0.55);
-    border: 1px solid rgba(255,215,0,0.4);
-    border-radius: 18px;
-    backdrop-filter: blur(18px);
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 26px;
+    padding: 10px 32px;
+    background: radial-gradient(circle at top, rgba(255,215,0,0.12), rgba(20,20,20,0.85));
+    border-radius: 999px;
+    border: 1px solid rgba(255,215,0,0.35);
+    box-shadow: 0 0 40px rgba(255,215,0,0.18);
+    backdrop-filter: blur(20px);
     z-index: 20;
 }
 
 .nav-item {
-    font-size: 20px;
+    position: relative;
+    font-size: 19px;
     font-weight: 600;
-    color: #f6d47a;
+    letter-spacing: 0.03em;
+    color: #f7df8b;
     cursor: pointer;
+    padding: 4px 4px;
+    text-transform: none;
+    transition: color 0.25s ease, transform 0.25s ease;
 }
+
+/* glowing dot */
+.nav-item::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255,215,0,0.7);
+    box-shadow: 0 0 10px rgba(255,215,0,0.9);
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* animated underline */
+.nav-item::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #f6d47a, #ffffff);
+    box-shadow: 0 0 12px rgba(255,215,0,0.85);
+    transition: width 0.28s ease;
+}
+
+/* separators */
+.nav-item + .nav-item {
+    border-left: 1px solid rgba(255,215,0,0.18);
+    padding-left: 26px;
+    margin-left: 4px;
+}
+
+/* hover state */
 .nav-item:hover {
     color: #ffffff;
-    text-shadow: 0 0 10px gold;
+    transform: translateY(-1px);
+}
+.nav-item:hover::after {
+    width: 60%;
+}
+.nav-item:hover::before {
+    opacity: 1;
+    transform: translate(-50%, -2px);
 }
 
 /* MAIN CONTENT ROW */
@@ -106,8 +161,8 @@ html, body {
     justify-content: center;
     align-items: center;
     gap: 140px;
-    /* small lift to visually center, but not so much that it causes overflow */
-    transform: translateY(-10px);
+    /* lower so rings & avatar sit closer to bottom */
+    transform: translateY(40px);
 }
 
 /* LEFT — NAME */
@@ -132,11 +187,11 @@ html, body {
 /* RIGHT — AVATAR */
 #avatarCanvas {
     width: 380px;
-    height: 520px;
+    height: 500px;   /* taller to show more body */
     z-index: 5;
 }
 
-/* BACKGROUND CANVASES */
+/* BACKGROUND CANVASES (fill full viewport) */
 #ringsCanvas, #adinkraCanvas {
     position: absolute;
     left: 0; 
@@ -164,7 +219,6 @@ html, body {
 
     <!-- CENTERED CONTENT -->
     <div class="center-row">
-
         <!-- NAME -->
         <div class="hero-text">
             <div class="hero-name">Mark Chweya</div>
@@ -182,6 +236,18 @@ html, body {
 <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
+/* Make iframe always exactly viewport height → no outer scroll */
+function resizeFrame() {
+    try {
+        if (window.frameElement) {
+            window.frameElement.style.height = window.innerHeight + "px";
+        }
+    } catch (e) {}
+}
+window.addEventListener("load", resizeFrame);
+window.addEventListener("resize", resizeFrame);
+resizeFrame();
+
 function fitCanvas(c){
     const w = c.clientWidth, h = c.clientHeight;
     if (c.width !== w || c.height !== h) {
@@ -190,7 +256,7 @@ function fitCanvas(c){
     }
 }
 
-/* ADINKRA */
+/* ADINKRA PARTICLES */
 const aCanvas = document.getElementById("adinkraCanvas");
 const actx = aCanvas.getContext("2d");
 const symbols = ["✺","✤","❂"];
@@ -199,7 +265,7 @@ let adinkra = [];
 function initAdinkra(){
     fitCanvas(aCanvas);
     adinkra = [];
-    for(let i=0;i<22;i++){
+    for(let i=0;i<26;i++){
         adinkra.push({
             x: Math.random()*aCanvas.width,
             y: Math.random()*aCanvas.height,
@@ -237,7 +303,7 @@ function animateRings(){
     rctx.clearRect(0,0,w,h);
 
     const cx = w * 0.70;
-    const cy = h * 0.52;
+    const cy = h * 0.64;   // fairly low so rings reach near bottom
     const t  = Date.now() * 0.00005;
 
     for (let i=0;i<3;i++){
@@ -265,7 +331,8 @@ renderer.setPixelRatio(window.devicePixelRatio);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
-camera.position.set(0, 1.05, 2.2);
+/* pull back so taller canvas still shows full body */
+camera.position.set(0, 1.05, 2.8);
 
 const keyLight = new THREE.DirectionalLight(0xf6d47a, 1.2);
 keyLight.position.set(2,3,4);
@@ -279,8 +346,8 @@ loader.load(
     "https://models.readyplayer.me/691a48795f9f523e503e7810.glb",
     gltf => {
         avatar = gltf.scene;
-        avatar.scale.set(1.45,1.45,1.45);
-        avatar.position.y = -1.20;
+        avatar.scale.set(1.6,1.6,1.6);   // slightly larger
+        avatar.position.y = -1.25;      // show more lower body
         scene.add(avatar);
     }
 );
@@ -310,8 +377,8 @@ function sendPanel(name){
 </script>
 """
 
-# Make the iframe exactly viewport height (no outer scroll)
-components.html(hero_html, height=768, scrolling=False)
+# Initial height is arbitrary; JS inside iframe resizes it to viewport height
+components.html(hero_html, height=600, scrolling=False)
 
 # --------------------------------------------------------
 # SLIDING PANELS
