@@ -48,7 +48,7 @@ section.main,
 )
 
 # --------------------------------------------------------
-# HERO SECTION — NAVBAR + NAME + AVATAR
+# HERO SECTION — BACKPACK NAV + NAME + AVATAR
 # --------------------------------------------------------
 hero_html = """
 <style>
@@ -73,84 +73,169 @@ html, body {
     align-items: center;
     justify-content: flex-start;
     overflow: hidden;
+    animation: heroIn 0.8s ease-out forwards;
+    opacity: 0;
+}
+@keyframes heroIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* NAVBAR – glassy, with separators + glow */
-.navbar {
-    margin-top: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 26px;
-    padding: 10px 32px;
-    background: radial-gradient(circle at top, rgba(255,215,0,0.12), rgba(20,20,20,0.85));
-    border-radius: 999px;
-    border: 1px solid rgba(255,215,0,0.35);
-    box-shadow: 0 0 40px rgba(255,215,0,0.18);
-    backdrop-filter: blur(20px);
-    z-index: 20;
-}
-
-.nav-item {
-    position: relative;
-    font-size: 19px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    color: #f7df8b;
-    cursor: pointer;
-    padding: 4px 4px;
-    text-transform: none;
-    transition: color 0.25s ease, transform 0.25s ease;
-}
-
-/* glowing dot */
-.nav-item::before {
-    content: "";
+/* BACKPACK NAV – upgraded look */
+.bag-nav {
     position: absolute;
-    top: -10px;
+    top: 28px;
     left: 50%;
     transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: 999px;
-    background: rgba(255,215,0,0.7);
-    box-shadow: 0 0 10px rgba(255,215,0,0.9);
-    opacity: 0;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 30;
+    user-select: none;
 }
 
-/* animated underline */
-.nav-item::after {
+/* backpack icon */
+.bag-icon {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    cursor: pointer;
+    border-radius: 32px;
+    background: radial-gradient(circle at 30% 0%, rgba(255,215,0,0.45), rgba(10,10,10,0.98));
+    box-shadow:
+        0 0 40px rgba(255,215,0,0.45),
+        0 24px 50px rgba(0,0,0,0.9);
+    backdrop-filter: blur(24px);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* bag body */
+.bag-body {
+    position: absolute;
+    inset: 18px 14px 20px 14px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #181818, #050505);
+    border: 1px solid rgba(255,215,0,0.4);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+}
+
+/* pocket */
+.bag-pocket {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 18px;
+    height: 22px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #252525, #111111);
+    border: 1px solid rgba(255,215,0,0.4);
+}
+
+/* flap */
+.bag-flap {
+    position: absolute;
+    top: 13px;
+    left: 20px;
+    right: 20px;
+    height: 20px;
+    border-radius: 16px 16px 12px 12px;
+    background: linear-gradient(180deg, #303030, #151515);
+    border: 1px solid rgba(255,215,0,0.45);
+}
+
+/* straps */
+.bag-strap-left,
+.bag-strap-right {
+    position: absolute;
+    top: 10px;
+    width: 14px;
+    height: 20px;
+    border-radius: 999px;
+    border: 2px solid rgba(255,215,0,0.6);
+    border-bottom: none;
+}
+.bag-strap-left { left: 20px; }
+.bag-strap-right { right: 20px; }
+
+/* glowing dot on bag (indicator) */
+.bag-dot {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255,215,0,0.95);
+    box-shadow: 0 0 14px rgba(255,215,0,1);
+}
+
+/* subtle breathing animation */
+.bag-icon {
+    animation: bagPulse 2.8s ease-in-out infinite;
+}
+@keyframes bagPulse {
+    0%, 100% { transform: translateY(0); box-shadow: 0 0 40px rgba(255,215,0,0.35), 0 24px 50px rgba(0,0,0,0.9); }
+    50%      { transform: translateY(-3px); box-shadow: 0 0 55px rgba(255,215,0,0.55), 0 28px 60px rgba(0,0,0,1); }
+}
+
+/* BAG MENU */
+.bag-menu {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: rgba(7,7,7,0.96);
+    backdrop-filter: blur(18px);
+    display: flex;
+    gap: 18px;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.85);
+    border: 1px solid rgba(255,215,0,0.15);
+}
+
+.bag-menu.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* items look like floating text with underline effect */
+.bag-item {
+    position: relative;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #f7df8b;
+    cursor: pointer;
+    padding: 4px 2px;
+    text-transform: none;
+    transition: color 0.25s ease, transform 0.25s ease;
+    user-select: none;
+}
+
+.bag-item::after {
     content: "";
     position: absolute;
     left: 50%;
-    bottom: -6px;
+    bottom: -3px;
     transform: translateX(-50%);
     width: 0;
     height: 2px;
     border-radius: 999px;
     background: linear-gradient(90deg, #f6d47a, #ffffff);
-    box-shadow: 0 0 12px rgba(255,215,0,0.85);
-    transition: width 0.28s ease;
+    box-shadow: 0 0 10px rgba(255,215,0,0.85);
+    transition: width 0.25s ease;
 }
 
-/* separators */
-.nav-item + .nav-item {
-    border-left: 1px solid rgba(255,215,0,0.18);
-    padding-left: 26px;
-    margin-left: 4px;
-}
-
-/* hover state */
-.nav-item:hover {
+.bag-item:hover {
     color: #ffffff;
     transform: translateY(-1px);
 }
-.nav-item:hover::after {
-    width: 60%;
-}
-.nav-item:hover::before {
-    opacity: 1;
-    transform: translate(-50%, -2px);
+.bag-item:hover::after {
+    width: 70%;
 }
 
 /* MAIN CONTENT ROW */
@@ -161,34 +246,61 @@ html, body {
     justify-content: center;
     align-items: center;
     gap: 140px;
-    /* lower so rings & avatar sit closer to bottom */
     transform: translateY(40px);
 }
 
-/* LEFT — NAME */
+/* LEFT — NAME + ROLE (with smoother animations) */
 .hero-text {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    animation: textIn 0.85s ease-out forwards;
+    opacity: 0;
 }
+@keyframes textIn {
+    from { opacity: 0; transform: translateX(-40px); filter: blur(6px); }
+    to   { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+
 .hero-name {
     font-size: 70px;
     font-weight: 900;
     background: linear-gradient(to right, #f6d47a, #ffffff);
     -webkit-background-clip: text;
     color: transparent;
+    text-shadow: 0 0 24px rgba(246,212,122,0.4);
 }
+
+/* subtitle animation – drift up + letter spacing easing */
 .hero-role {
     font-size: 28px;
     color: #eaeaea;
-    margin-top: -12px;
+    margin-top: -8px;
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+    letter-spacing: 0.24em;
+    animation: roleIn 0.9s ease-out forwards;
+    animation-delay: 0.25s;
+}
+@keyframes roleIn {
+    from { opacity: 0; transform: translateY(16px); filter: blur(6px); letter-spacing: 0.24em; }
+    to   { opacity: 1; transform: translateY(0);  filter: blur(0);  letter-spacing: 0.04em; }
 }
 
 /* RIGHT — AVATAR */
 #avatarCanvas {
-    width: 380px;
-    height: 500px;   /* taller to show more body */
+    width: 420px;
+    height: 540px;
     z-index: 5;
+    opacity: 0;
+    transform: translateY(25px) scale(0.97);
+    animation: avatarIn 0.9s ease-out forwards;
+    animation-delay: 0.2s;
+}
+@keyframes avatarIn {
+    from { opacity: 0; transform: translateY(25px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* BACKGROUND CANVASES (fill full viewport) */
@@ -199,18 +311,37 @@ html, body {
     width: 100%;
     height: 100%;
     z-index: 0;
+    opacity: 0;
+    animation: bgIn 0.9s ease-out forwards;
+}
+#adinkraCanvas { animation-delay: 0.15s; }
+#ringsCanvas   { animation-delay: 0.25s; }
+
+@keyframes bgIn {
+    from { opacity: 0; filter: blur(4px); }
+    to   { opacity: 1; filter: blur(0); }
 }
 </style>
 
 <div class="hero-wrap">
 
-    <!-- NAVBAR -->
-    <div class="navbar">
-        <span class="nav-item" onclick="sendPanel('Home')">Home</span>
-        <span class="nav-item" onclick="sendPanel('Projects')">Projects</span>
-        <span class="nav-item" onclick="sendPanel('About')">About</span>
-        <span class="nav-item" onclick="sendPanel('Resume')">Resume</span>
-        <span class="nav-item" onclick="sendPanel('Contact')">Contact</span>
+    <!-- BACKPACK NAV -->
+    <div class="bag-nav">
+        <div class="bag-icon" onclick="toggleBagMenu()">
+            <div class="bag-body"></div>
+            <div class="bag-pocket"></div>
+            <div class="bag-flap"></div>
+            <div class="bag-strap-left"></div>
+            <div class="bag-strap-right"></div>
+            <div class="bag-dot"></div>
+        </div>
+        <div class="bag-menu" id="bagMenu">
+            <span class="bag-item" onclick="sendPanel('Home')">Home</span>
+            <span class="bag-item" onclick="sendPanel('Projects')">Projects</span>
+            <span class="bag-item" onclick="sendPanel('About')">About</span>
+            <span class="bag-item" onclick="sendPanel('Resume')">Resume</span>
+            <span class="bag-item" onclick="sendPanel('Contact')">Contact</span>
+        </div>
     </div>
 
     <!-- BACKGROUND ANIMATIONS -->
@@ -219,10 +350,10 @@ html, body {
 
     <!-- CENTERED CONTENT -->
     <div class="center-row">
-        <!-- NAME -->
+        <!-- NAME + ROLE -->
         <div class="hero-text">
             <div class="hero-name">Mark Chweya</div>
-            <div class="hero-role">Data Science & Artificial Intelligence</div>
+            <div class="hero-role">Data Science &amp; Artificial Intelligence</div>
         </div>
 
         <!-- AVATAR -->
@@ -248,6 +379,7 @@ window.addEventListener("load", resizeFrame);
 window.addEventListener("resize", resizeFrame);
 resizeFrame();
 
+/* Helper: fit canvases */
 function fitCanvas(c){
     const w = c.clientWidth, h = c.clientHeight;
     if (c.width !== w || c.height !== h) {
@@ -256,7 +388,13 @@ function fitCanvas(c){
     }
 }
 
-/* ADINKRA PARTICLES */
+/* ------------------ BACKPACK MENU TOGGLE ------------------ */
+function toggleBagMenu(){
+    const menu = document.getElementById("bagMenu");
+    menu.classList.toggle("open");
+}
+
+/* ------------------ ADINKRA PARTICLES ------------------ */
 const aCanvas = document.getElementById("adinkraCanvas");
 const actx = aCanvas.getContext("2d");
 const symbols = ["✺","✤","❂"];
@@ -293,7 +431,7 @@ function animateAdinkra(){
 initAdinkra();
 animateAdinkra();
 
-/* RINGS */
+/* ------------------ RINGS – all rotating, different speeds & directions ------------------ */
 const rCanvas = document.getElementById("ringsCanvas");
 const rctx = rCanvas.getContext("2d");
 
@@ -303,20 +441,23 @@ function animateRings(){
     rctx.clearRect(0,0,w,h);
 
     const cx = w * 0.70;
-    const cy = h * 0.64;   // fairly low so rings reach near bottom
-    const t  = Date.now() * 0.00005;
+    const cy = h * 0.64;
+    const t  = Date.now() * 0.00004;  // global time
+
+    // three rings, each with its own speed + direction
+    const speeds = [0.6, -0.4, 0.25];
 
     for (let i=0;i<3;i++){
         const R = 130 + i*40;
-        rctx.beginPath();
-        rctx.arc(cx, cy, R, 0, Math.PI*2);
-        rctx.strokeStyle = "rgba(255,215,0," + (0.35 - i*0.1) + ")";
-        rctx.lineWidth = 3;
+        const alpha = 0.35 - i*0.1;
 
         rctx.save();
         rctx.translate(cx,cy);
-        rctx.rotate((i%2===0?1:-1)*t);
-        rctx.translate(-cx,-cy);
+        rctx.rotate(t * speeds[i]);  // slow rotation, each different
+        rctx.beginPath();
+        rctx.arc(0, 0, R, 0, Math.PI*2);
+        rctx.strokeStyle = "rgba(255,215,0," + alpha + ")";
+        rctx.lineWidth = 3;
         rctx.stroke();
         rctx.restore();
     }
@@ -324,34 +465,52 @@ function animateRings(){
 }
 animateRings();
 
-/* 3D AVATAR */
+/* ------------------ 3D AVATAR – brighter + more visible ------------------ */
 const avatarCanvas = document.getElementById("avatarCanvas");
 const renderer = new THREE.WebGLRenderer({canvas: avatarCanvas, alpha:true});
 renderer.setPixelRatio(window.devicePixelRatio);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
-/* pull back so taller canvas still shows full body */
-camera.position.set(0, 1.05, 2.8);
+camera.position.set(0, 1.1, 2.5);
 
-const keyLight = new THREE.DirectionalLight(0xf6d47a, 1.2);
-keyLight.position.set(2,3,4);
+/* KEY LIGHT – strong from front-right */
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.1);
+keyLight.position.set(2.4, 3.2, 4.0);
 scene.add(keyLight);
-scene.add(new THREE.AmbientLight(0xffffff,0.4));
+
+/* FILL LIGHT – from left to soften shadows */
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
+fillLight.position.set(-2.0, 2.5, 1.8);
+scene.add(fillLight);
+
+/* RIM LIGHT – from behind for outline */
+const rimLight = new THREE.DirectionalLight(0xffd980, 0.8);
+rimLight.position.set(-2.5, 1.5, -3.0);
+scene.add(rimLight);
+
+/* AMBIENT – lift everything */
+const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+scene.add(ambient);
 
 let avatar = null;
 const loader = new THREE.GLTFLoader();
 
 loader.load(
-    "https://models.readyplayer.me/691a48795f9f523e503e7810.glb",
+    "https://models.readyplayer.me/691ac987786317131c914b96.glb",
     gltf => {
         avatar = gltf.scene;
-        avatar.scale.set(1.6,1.6,1.6);   // slightly larger
-        avatar.position.y = -1.25;      // show more lower body
+        avatar.scale.set(1.7,1.7,1.7);
+        avatar.position.y = -1.3;
         scene.add(avatar);
+    },
+    undefined,
+    err => {
+        console.error("Error loading avatar:", err);
     }
 );
 
+// Mouse drag to control spin speed
 let dragging = false, prevX = 0, rot = 0.004;
 avatarCanvas.addEventListener("mousedown", e => { dragging = true; prevX = e.clientX; });
 window.addEventListener("mouseup", () => { dragging = false; });
@@ -364,13 +523,14 @@ window.addEventListener("mousemove", e => {
 
 function animateAvatar(){
     requestAnimationFrame(animateAvatar);
+
     if (avatar) avatar.rotation.y += rot;
     renderer.setSize(avatarCanvas.clientWidth, avatarCanvas.clientHeight);
     renderer.render(scene, camera);
 }
 animateAvatar();
 
-/* NAVBAR → STREAMLIT */
+/* NAV MENU → STREAMLIT PANELS */
 function sendPanel(name){
     window.parent.postMessage({panel: name}, "*");
 }
