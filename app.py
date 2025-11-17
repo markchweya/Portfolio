@@ -11,54 +11,39 @@ st.set_page_config(
 )
 
 # --------------------------------------------------------
-# GLOBAL CSS – REMOVE PADDING + SCROLL
+# GLOBAL CSS – REMOVE STREAMLIT PADDING + SCROLLBAR
 # --------------------------------------------------------
-st.markdown("""
+st.markdown(
+    """
 <style>
-/* Kill Streamlit chrome */
+/* Hide default Streamlit chrome */
 #MainMenu, footer, header {visibility: hidden;}
 [data-testid="stToolbar"] {display: none !important;}
-[data-testid="stDecoration"] {display: none !important;}
 [data-testid="stSidebar"] {display: none !important;}
+[data-testid="stDecoration"] {display: none !important;}
 
-/* Make the whole app exactly full screen, no padding */
-html, body {
-    margin: 0 !important;
+/* Remove padding from the main app area */
+[data-testid="stAppViewContainer"] {
     padding: 0 !important;
-    height: 100vh !important;
-    width: 100vw !important;
-    overflow: hidden !important;
-    background: #0d0f13 !important;
 }
 
-/* App container */
-[data-testid="stAppViewContainer"],
-[data-testid="stAppViewContainer"] > .main,
-.main {
-    margin: 0 !important;
+.main, .block-container {
     padding: 0 !important;
-    height: 100vh !important;
-    width: 100vw !important;
-    overflow: hidden !important;
-}
-
-/* Block container */
-.main .block-container {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
 }
 
-/* Individual vertical blocks */
-[data-testid="stVerticalBlock"] {
+/* Kill page scrolling completely */
+html, body {
     margin: 0 !important;
     padding: 0 !important;
+    overflow: hidden !important;
+    background: #0d0f13 !important;
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # --------------------------------------------------------
 # HERO SECTION — NAVBAR + NAME + AVATAR
@@ -71,13 +56,16 @@ html, body {
     padding: 0;
     height: 100%;
     background: #0d0f13;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* FULLSCREEN HERO INSIDE IFRAME */
+/* FULLSCREEN HERO INSIDE IFRAME (fills the iframe height) */
 .hero-wrap {
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
     background: #0d0f13;
     display: flex;
     flex-direction: column;
@@ -88,7 +76,7 @@ html, body {
 
 /* NAVBAR */
 .navbar {
-    margin-top: 0px;  /* no extra band */
+    margin-top: 20px;
     display: flex;
     gap: 40px;
     padding: 10px 40px;
@@ -118,7 +106,8 @@ html, body {
     justify-content: center;
     align-items: center;
     gap: 140px;
-    transform: translateY(-30px);  /* pull a bit upward */
+    /* small lift to visually center, but not so much that it causes overflow */
+    transform: translateY(-10px);
 }
 
 /* LEFT — NAME */
@@ -150,7 +139,8 @@ html, body {
 /* BACKGROUND CANVASES */
 #ringsCanvas, #adinkraCanvas {
     position: absolute;
-    left: 0; top: 0;
+    left: 0; 
+    top: 0;
     width: 100%;
     height: 100%;
     z-index: 0;
@@ -320,8 +310,8 @@ function sendPanel(name){
 </script>
 """
 
-# Slightly under full height so the outer page doesn't need to scroll
-components.html(hero_html, height=680, scrolling=False)
+# Make the iframe exactly viewport height (no outer scroll)
+components.html(hero_html, height=768, scrolling=False)
 
 # --------------------------------------------------------
 # SLIDING PANELS
@@ -402,26 +392,38 @@ def panel_html(title, body):
     """
 
 panels = {
-    "Projects": panel_html("Projects", """
+    "Projects": panel_html(
+        "Projects",
+        """
         <p><b>🔹 Titanic Survival Predictor</b></p>
         <p><b>🔹 AQI Predictor</b></p>
         <p><b>🔹 Mental Health Predictor</b></p>
         <p><b>🔹 KukiLabs AI Tools</b></p>
-    """),
-    "About": panel_html("About Me", """
+        """,
+    ),
+    "About": panel_html(
+        "About Me",
+        """
         I am <b>Mark Chweya</b>, a Data Science & AI developer building predictive models,
         analytics pipelines, and futuristic African UI experiences.
-    """),
-    "Resume": panel_html("Resume", """
+        """,
+    ),
+    "Resume": panel_html(
+        "Resume",
+        """
         <b>Education</b><br>
         • USIU–Africa — Data Science<br><br>
         <b>Skills</b><br>
         Python, ML, Streamlit, AI Systems
-    """),
-    "Contact": panel_html("Contact Me", """
+        """,
+    ),
+    "Contact": panel_html(
+        "Contact Me",
+        """
         Email: <span style='color:#f6d47a;'>chweyamark@gmail.com</span><br>
         Phone: <span style='color:#f6d47a;'>+254 703 951 840</span>
-    """)
+        """,
+    ),
 }
 
 # --------------------------------------------------------
