@@ -29,10 +29,12 @@ html, body {
     background: #0d0f13 !important;
 }
 
+/* Kill all extra padding/margins around Streamlit main area */
 #root,
 [data-testid="stAppViewContainer"],
 section.main,
-.block-container {
+.block-container,
+div[role="main"] {
     margin: 0 !important;
     padding: 0 !important;
     height: 100vh !important;
@@ -285,7 +287,8 @@ html, body {
     justify-content: center;
     align-items: center;
     gap: 140px;
-    transform: translateY(40px);
+    /* no vertical push down – sit higher */
+    transform: translateY(0);
     position: relative;
     z-index: 2;
 }
@@ -388,19 +391,31 @@ html, body {
     to   { opacity: 1; transform: translateY(0);  filter: blur(0);  letter-spacing: 0.05em; }
 }
 
-/* RIGHT — AVATAR */
+/* RIGHT — AVATAR: base state only, animation via random classes */
 #avatarCanvas {
     width: 420px;
     height: 540px;
     z-index: 5;
     opacity: 0;
     transform: translateY(25px) scale(0.97);
-    animation: avatarIn 0.9s ease-out forwards;
-    animation-delay: 0.2s;
 }
-@keyframes avatarIn {
-    from { opacity: 0; transform: translateY(25px) scale(0.93); }
-    to   { opacity: 1; transform: translateY(0) scale(0.98); }
+
+/* random left entry */
+.avatar-enter-left {
+    animation: avatarInLeft 0.9s ease-out forwards;
+}
+@keyframes avatarInLeft {
+    from { opacity: 0; transform: translate(-50px, 25px) scale(0.9); }
+    to   { opacity: 1; transform: translate(0px, 0px) scale(0.98); }
+}
+
+/* random right entry */
+.avatar-enter-right {
+    animation: avatarInRight 0.9s ease-out forwards;
+}
+@keyframes avatarInRight {
+    from { opacity: 0; transform: translate(50px, 25px) scale(0.9); }
+    to   { opacity: 1; transform: translate(0px, 0px) scale(0.98); }
 }
 
 /* EXTRA SYNC ANIMATION WHEN NAME FINISHES */
@@ -473,7 +488,7 @@ html, body {
 <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
-/* Make iframe match viewport height */
+/* Make iframe try to match viewport height */
 function resizeFrame() {
     try {
         if (window.frameElement) {
@@ -499,10 +514,11 @@ const bagNav = document.getElementById("bagNav");
 const bagIcon = document.getElementById("bagIcon");
 const bagMenu = document.getElementById("bagMenu");
 
-let bagX = window.innerWidth / 2 - 60;
-let bagY = 20;
+const spawnPadding = 40;
+let bagX = spawnPadding + Math.random() * (window.innerWidth  - 120 - spawnPadding * 2);
+let bagY = spawnPadding + Math.random() * (window.innerHeight - 120 - spawnPadding * 2);
 bagNav.style.left = bagX + "px";
-bagNav.style.top = bagY + "px";
+bagNav.style.top  = bagY + "px";
 
 let vx = 0, vy = 0;
 let draggingBag = false;
@@ -539,7 +555,7 @@ window.addEventListener("mousemove", (e) => {
     bagY = e.clientY - dragOffsetY;
 
     bagNav.style.left = bagX + "px";
-    bagNav.style.top = bagY + "px";
+    bagNav.style.top  = bagY + "px";
 
     vx = dx / dt * 16;
     vy = dy / dt * 16;
@@ -577,7 +593,7 @@ function animateBag(){
         const navW = bagNav.offsetWidth || 120;
         const navH = bagNav.offsetHeight || 120;
 
-        let maxX = window.innerWidth - navW - padding;
+        let maxX = window.innerWidth  - navW - padding;
         let maxY = window.innerHeight - navH - padding;
 
         if (bagX < padding) {
@@ -622,7 +638,7 @@ function animateBag(){
         vy *= 0.985;
 
         bagNav.style.left = bagX + "px";
-        bagNav.style.top = bagY + "px";
+        bagNav.style.top  = bagY + "px";
 
         const angle = vx * 1.2;
         bagIcon.style.transform = "rotate(" + angle + "deg)";
@@ -638,7 +654,7 @@ const codeCtx = codeCanvas.getContext("2d");
 let codeParticles = [];
 
 function randomToken() {
-    const chars = "01xyzλΣμσπ∂µσπ{}()[]+-*/<>:=._#";
+    const chars = "01xyzλΣµσπ∂µσπ{}()[]+-*/<>:=._#";
     const len = 3 + Math.floor(Math.random() * 6);
     let s = "";
     for (let i = 0; i < len; i++) {
@@ -699,7 +715,7 @@ function animateCode(){
 initCode();
 animateCode();
 
-/* ------------------ RINGS – MORE VISIBLE ROTATION ------------------ */
+/* ------------------ RINGS – rotating ------------------ */
 const rCanvas = document.getElementById("ringsCanvas");
 const rctx = rCanvas.getContext("2d");
 
@@ -734,6 +750,13 @@ animateRings();
 
 /* ------------------ 3D AVATAR ------------------ */
 const avatarCanvas = document.getElementById("avatarCanvas");
+
+/* random entry direction each reload */
+if (avatarCanvas) {
+    const entryClass = Math.random() < 0.5 ? "avatar-enter-left" : "avatar-enter-right";
+    avatarCanvas.classList.add(entryClass);
+}
+
 const renderer = new THREE.WebGLRenderer({canvas: avatarCanvas, alpha:true});
 renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -901,7 +924,7 @@ function sendPanel(name){
 </script>
 """
 
-components.html(hero_html, height=600, scrolling=False)
+components.html(hero_html, height=800, scrolling=False)
 
 # --------------------------------------------------------
 # SLIDING PANELS
