@@ -42,6 +42,36 @@ div[role="main"] {
     overflow: hidden !important;
     max-width: 100% !important;
 }
+
+/* ------------------ HARD CLAMP: FIRST HTML IFRAME FULLSCREEN (NO TOP GAP) ------------------ */
+div[data-testid="stHtml"]:first-of-type {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Overshoot a few px above the viewport so any Streamlit band is covered */
+div[data-testid="stHtml"]:first-of-type iframe {
+    position: fixed !important;
+    top: -4px !important;                           /* go slightly above the top edge */
+    left: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh + 8px) !important;           /* extend past bottom a bit too */
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    display: block !important;
+    background: transparent !important;
+    z-index: 1 !important;
+}
+
+/* Keep any other HTML components (like your hidden panel engine) normal */
+div[data-testid="stHtml"]:not(:first-of-type) iframe {
+    position: static !important;
+    inset: auto !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: 0 !important;
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -63,8 +93,12 @@ html, body {
 
 /* HERO container */
 .hero-wrap {
-    position: relative;
-    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
     height: 100vh;
     background: radial-gradient(circle at 20% 0%, #161922, #050609);
     display: flex;
@@ -91,9 +125,10 @@ html, body {
     z-index: 0;
 }
 
+/* no vertical push, just a subtle scale in */
 @keyframes heroIn {
-    from { opacity: 0; transform: translateY(10px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: scale(0.98); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
 /* BACKPACK NAV – draggable wrapper */
@@ -287,7 +322,6 @@ html, body {
     justify-content: center;
     align-items: center;
     gap: 140px;
-    /* no vertical push down – sit higher */
     transform: translateY(0);
     position: relative;
     z-index: 2;
