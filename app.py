@@ -12,14 +12,22 @@ st.set_page_config(
 
 # --------------------------------------------------------
 # GLOBAL CSS – LOCK APP TO 100vh, NO SCROLL
+# (FIX: make the FIRST components.html iframe truly fullscreen and cover Streamlit's top reserved band)
 # --------------------------------------------------------
 st.markdown(
     """
 <style>
-#MainMenu, footer, header {visibility: hidden;}
+#MainMenu, footer, header {display: none !important;} /* display:none so NO reserved space */
 [data-testid="stToolbar"] {display: none !important;}
 [data-testid="stSidebar"] {display: none !important;}
 [data-testid="stDecoration"] {display: none !important;}
+[data-testid="stHeader"] {display:none !important; height:0 !important;}
+
+/* Remove Streamlit's top padding that can remain even if header is hidden */
+[data-testid="stApp"] {margin:0 !important; padding:0 !important;}
+[data-testid="stAppViewContainer"] {margin:0 !important; padding-top:0 !important;}
+section.main {margin:0 !important; padding-top:0 !important;}
+.block-container {margin:0 !important; padding:0 !important; max-width:100% !important;}
 
 html, body {
     margin: 0 !important;
@@ -44,27 +52,30 @@ div[role="main"] {
 }
 
 /* ------------------ HARD CLAMP: FIRST HTML IFRAME FULLSCREEN (NO TOP GAP) ------------------ */
-div[data-testid="stHtml"]:first-of-type {
+/* Streamlit sometimes keeps a top band; we COVER it by pinning the iframe to the viewport */
+div[data-testid="stHtml"]:first-of-type{
     margin: 0 !important;
     padding: 0 !important;
+    height: 0 !important;          /* no layout push */
+    line-height: 0 !important;
 }
 
-/* Overshoot a few px above the viewport so any Streamlit band is covered */
-div[data-testid="stHtml"]:first-of-type iframe {
+/* Overshoot upward to cover the stubborn top black band */
+div[data-testid="stHtml"]:first-of-type iframe{
     position: fixed !important;
-    top: -4px !important;                           /* go slightly above the top edge */
+    top: -90px !important;                          /* <-- covers Streamlit reserved band */
     left: 0 !important;
     width: 100vw !important;
-    height: calc(100vh + 8px) !important;           /* extend past bottom a bit too */
+    height: calc(100vh + 90px) !important;          /* keep bottom covered too */
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
     display: block !important;
     background: transparent !important;
-    z-index: 1 !important;
+    z-index: 9999 !important;
 }
 
-/* Keep any other HTML components (like your hidden panel engine) normal */
+/* Keep any other HTML components (like your hidden panel engine) normal/inert */
 div[data-testid="stHtml"]:not(:first-of-type) iframe {
     position: static !important;
     inset: auto !important;
